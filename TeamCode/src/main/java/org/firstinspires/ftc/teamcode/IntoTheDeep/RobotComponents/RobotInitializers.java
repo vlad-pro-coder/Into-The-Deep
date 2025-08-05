@@ -52,7 +52,7 @@ import java.util.List;
 public class RobotInitializers {
     public static List<LynxModule> hubs;
 
-    public static Telemetry telemetry = FtcDashboard.getInstance().getTelemetry();
+    public static Telemetry Dashtelemetry;
     public static IMU imu;
     public static DcMotorController ControlHubMotors, ExpansionHubMotors;
     public static ServoController ControlHubServos, ExpansionHubServos, ServoHub;
@@ -71,15 +71,15 @@ public class RobotInitializers {
             l.engage();
         }
     }
-
-    public static void startLimeLightStream(Limelight3A camera){
-
+    public static void enableDashTelemetry(){
+        Dashtelemetry = FtcDashboard.getInstance().getTelemetry();
     }
     public static void InitializeHubs(HardwareMap hm){
         InitializeHubs(hm, false);
     }
 
     public static void InitializeHubs(HardwareMap hm, boolean b){
+        enableDashTelemetry();
         if(hubs != null) return;
         hubs = hm.getAll(LynxModule.class);
 //        if(b)
@@ -147,7 +147,7 @@ public class RobotInitializers {
             l.clearBulkCache();
         }
         if(update)
-            telemetry.update();
+            Dashtelemetry.update();
         if(logFreq.seconds() >= 1) {
             RobotLog.ii("frequency", String.valueOf(1000.f / (System.currentTimeMillis() - loopTime)));
             logFreq.reset();
@@ -173,9 +173,9 @@ public class RobotInitializers {
     }
     public static void InitializeChassis(){
         Chassis.FL = new CachedMotor(ControlHubMotors, 1, DcMotorSimple.Direction.FORWARD);
-        Chassis.FR = new CachedMotor(ExpansionHubMotors, 0, DcMotorSimple.Direction.FORWARD);
+        Chassis.FR = new CachedMotor(ExpansionHubMotors, 0, DcMotorSimple.Direction.REVERSE);
         Chassis.BL = new CachedMotor(ControlHubMotors, 0, DcMotorSimple.Direction.FORWARD);
-        Chassis.BR = new CachedMotor(ExpansionHubMotors, 2, DcMotorSimple.Direction.FORWARD);
+        Chassis.BR = new CachedMotor(ExpansionHubMotors, 2, DcMotorSimple.Direction.REVERSE);
 
         Chassis.FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Chassis.FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -189,8 +189,8 @@ public class RobotInitializers {
     public static void InitializeIntake(HardwareMap hm){
         Intake.colorsensor = hm.get(RGBsensor.class, "Storage");
         Intake.dropdownServo = new ServoPlus(ControlHubServos, 1, Servo.Direction.FORWARD);
-        Intake.spinner = new CachedMotor(ControlHubMotors, 3, DcMotorSimple.Direction.FORWARD);
-        Intake.blocker = new ServoPlus(ControlHubServos, 2, Servo.Direction.REVERSE); // TODO: portul bun
+        Intake.spinner = new CachedMotor(ControlHubMotors, 3, DcMotorSimple.Direction.REVERSE);
+        Intake.blocker = new ServoPlus(ControlHubServos, 2, Servo.Direction.FORWARD); // TODO: portul bun
     }
 
     public static void InitializeExtendo(){
@@ -220,5 +220,15 @@ public class RobotInitializers {
         PtoAndWheelie.W1 = new ServoPlus(ServoHub, 3, Servo.Direction.FORWARD);
         PtoAndWheelie.W2 = new ServoPlus(ServoHub, 4, Servo.Direction.FORWARD);
         PtoAndWheelie.PTO = new ServoPlus(ServoHub, 5, Servo.Direction.FORWARD);
+    }
+
+    public static void InitializeForOperation(){
+        Lift.state = Lift.LIFTSTATES.RETRACTING;
+        Extendo.state = Extendo.ExtendoStates.RETRACTING;
+        Outtake.OverHead_TAKESAMPLE();
+        Outtake.setExtensionPos(0);
+        Outtake.openClaw();
+        Intake.DropUp();
+        Intake.Unblock();
     }
 }

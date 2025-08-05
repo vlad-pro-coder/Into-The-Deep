@@ -25,8 +25,8 @@ public class Intake {
     public static ServoPlus blocker,dropdownServo;
     public static CachedMotor spinner;
     public static RGBsensor colorsensor;
-    private static double dropdownAngle = 0,dropupAngle = 0;
-    private static double NotBlockingPos = 0,BlockingPos = 0;
+    public static double dropdownAngle = 185,dropupAngle = 290,startDropDownUpCorrection = 230;
+    public static double NotBlockingPos = 25,BlockingPos = 170;
 
 
     public static void Block(){
@@ -37,7 +37,8 @@ public class Intake {
         blocker.setAngle(NotBlockingPos);
     }
     public static void DropDown(){
-        dropdownServo.setAngle(dropdownAngle);
+        double pos = dropdownAngle + (startDropDownUpCorrection - dropdownAngle) / Extendo.MaxExtension * Extendo.getPosition();
+        dropdownServo.setAngle(pos);
     }
 
     public static void DropUp(){

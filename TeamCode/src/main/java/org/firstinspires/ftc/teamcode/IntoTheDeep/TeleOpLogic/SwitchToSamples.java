@@ -23,11 +23,11 @@ public class SwitchToSamples {
             }).addTask(new Task() {
                 @Override
                 protected void Actions() {
-                    Lift.CustomPowerToMotors(-0.5);
+                    Lift.CustomPowerToMotors(-0.3);
                 }
                 @Override
                 protected boolean Conditions() {
-                    return Lift.getPosition() < 20;
+                    return Lift.getPosition() < 30;
                 }
             }).addTask(new Task() {
                 @Override

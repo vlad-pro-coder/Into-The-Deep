@@ -15,11 +15,15 @@ public class PanicReset {
                     Lift.state = Lift.LIFTSTATES.OFF;
                     Outtake.openClaw();
                     Extendo.state = Extendo.ExtendoStates.FREEWILL;
+                    Outtake.OverHead_TAKESAMPLE();
+                    Outtake.setExtensionPos(0);
                 }
 
                 @Override
                 protected boolean Conditions() {
-                    return Outtake.IsClawDone();
+                    return Outtake.IsClawDone() &&
+                            Outtake.OverHeadDoneness() &&
+                            Outtake.ExtensionDoneness(0);
                 }
             });
 

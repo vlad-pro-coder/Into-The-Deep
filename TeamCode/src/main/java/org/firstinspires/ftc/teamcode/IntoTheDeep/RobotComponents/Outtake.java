@@ -18,14 +18,14 @@ public class Outtake {
     public static ServoPlus Overheads1,Overheads2,Claw,Extension;
 
     public static AsymmetricMotionProfile armProfile,ExtensionProfile;
-    public static double extendoPos = 95, retractPos = 295;
-    public static double ClawOpenPos = 0, ClawClosePos = 0;
-    public static double OverHeadTakeSampPos = 0,OverHeadOverBasketPos = 0, OverHeadTakeSpecPos = 0,
-            OverHeadScoreSpecPos = 0,OverHeadBasketMovingSafePos = 0;
+    public static double extendoPos = 115, retractPos = 315;
+    public static double ClawOpenPos = 140, ClawClosePos = 45;
+    public static double OverHeadTakeSampPos = 355,OverHeadOverBasketPos = 90, OverHeadTakeSpecPos = 0,
+            OverHeadScoreSpecPos = 0,OverHeadBasketMovingSafePos = 180;
     private static double tmp = 0;
     static {
-        armProfile = new AsymmetricMotionProfile(10000, 5500, 2500);
-        ExtensionProfile = new AsymmetricMotionProfile(0, 0, 0);
+        armProfile = new AsymmetricMotionProfile(9000, 5500, 2500);
+        ExtensionProfile = new AsymmetricMotionProfile(500, 100000, 100000);
     }
 
 
@@ -38,7 +38,7 @@ public class Outtake {
         tmp = System.currentTimeMillis() * 1000;
     }
     public static boolean IsClawDone(){
-        return System.currentTimeMillis() * 1000 - tmp > 0.05;
+        return System.currentTimeMillis() * 1000 - tmp > 0.9;
     }
 
     public static void setOverHeadPos(double targetPos) {
@@ -46,7 +46,7 @@ public class Outtake {
     }
 
     public static boolean OverHeadDoneness(double OffsetFromTarget){
-        return Math.abs(armProfile.getPosition() - armProfile.getTargetPosition()) >= OffsetFromTarget;
+        return Math.abs(armProfile.getPosition() - armProfile.getTargetPosition()) <= OffsetFromTarget;
     }
     public static boolean OverHeadDoneness(){
         return armProfile.motionEnded();
@@ -56,6 +56,9 @@ public class Outtake {
         ExtensionProfile.startMotion(ExtensionProfile.getPosition(),motion,ExtensionProfile.getVelocity());
     }
     public static boolean ExtensionDoneness(double OffsetFromTarget) {
+        return Math.abs(ExtensionProfile.getPosition() - ExtensionProfile.getTargetPosition()) <= OffsetFromTarget;
+    }
+    public static boolean ExtensionDoneness() {
         return ExtensionProfile.motionEnded();
     }
     public static void OverHead_TAKESAMPLE(){
@@ -78,10 +81,14 @@ public class Outtake {
         Overheads1.setAngle(armProfile.getPosition());
         Overheads2.setAngle(armProfile.getPosition());
 
+
+
         Extension.setAngle(ExtensionProfile.getPosition());
 
         armProfile.update();
         ExtensionProfile.update();
+
+        RobotInitializers.Dashtelemetry.addData("overhead angle",armProfile.getPosition());
     }
 
 }

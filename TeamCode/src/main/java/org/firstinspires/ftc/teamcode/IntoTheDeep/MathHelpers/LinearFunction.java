@@ -4,14 +4,9 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public class LinearFunction {
-    public double start, end;
-
-    public LinearFunction(double start, double end){
-        this.start = start;
-        this.end = end;
-    }
-
-    public double getOutput(double t){
-        return (end - start) * t + start;
+    public static double getOutput(double pstart,double pend,double estart, double eend,double t){
+        if(eend - estart == 0)
+            return 0;
+        return pstart + (t - estart) * (pend - pstart) / (eend - estart);
     }
 }

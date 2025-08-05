@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation;
 
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -65,6 +66,9 @@ public class Scheduler {
         return this;
     }
     public void clear(){
+        Task t = tasks.peek();
+        if(t != null)
+            t.RanOnce = false;
         tasks.clear();
     }
 
@@ -73,6 +77,7 @@ public class Scheduler {
             return;
         Task t = tasks.peek();
         assert t != null;
+
         boolean result = t.Run();
         if(result) {
             tasks.poll();

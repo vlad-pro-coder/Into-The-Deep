@@ -1,27 +1,37 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep;
 
+
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ControllersRelated.SimplyfiedControllers;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Chassis;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Lift;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.MainHandler;
 
 public class TeleopsStarter {
     public static TEAM team = TEAM.RED;
 
-    public static SimplyfiedControllers gm1;
-    public static SimplyfiedControllers gm2;
-    public static double tSpeed = 1, rot = 0.7;
+    public static Gamepad gm1;
+    public static Gamepad gm2;
+    public static double tSpeed = 1, rot = 1;
     public static boolean reverse = true;
     public static double min = 0.4;
-    Limelight3A c;
+    MainHandler ActionHandler;
 
-    public TeleopsStarter(HardwareMap hardwareMap,TEAM color){
-        gm1 = new SimplyfiedControllers(1);
-        gm2 = new SimplyfiedControllers(2);
+    public TeleopsStarter(HardwareMap hardwareMap,TEAM color,Gamepad gm1,Gamepad gm2){
+        TeleopsStarter.gm1 = gm1;
+        TeleopsStarter.gm2 = gm2;
+        RobotInitializers.InitializeFull(hardwareMap);
+        RobotInitializers.InitializeForOperation();
+        RobotInitializers.disable();
+        ActionHandler = new MainHandler();
         team = color;
     }
 
@@ -35,6 +45,7 @@ public class TeleopsStarter {
     }
 
     public void update(){
+        RobotInitializers.clearCache();
 
         if(Lift.getPosition() > 500){
             tSpeed = 0.6;
@@ -48,8 +59,17 @@ public class TeleopsStarter {
                 (reverse ? 1 : -1) * getPowerSigned(gm1.left_stick_y, 3) * tSpeed,
                 getPowerSigned(gm1.right_trigger - gm1.left_trigger, 3) * tSpeed * pow * rot
         );
-        gm1.update();
-        gm2.update();
+
+        //Chassis.update();
+        Extendo.update();
+        Lift.update();
+        Localizer.Update();
+        Outtake.update();
+
+        ActionHandler.update();
+
+        //gm1.update();
+        //gm2.update();
 
 
     }

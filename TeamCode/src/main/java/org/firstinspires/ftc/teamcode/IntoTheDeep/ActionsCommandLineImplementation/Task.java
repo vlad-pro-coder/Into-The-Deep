@@ -2,14 +2,17 @@ package org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementat
 
 
 public abstract class Task {
-    private boolean initialized = false;
 
+    public boolean RanOnce = false;
     public final boolean Run() {
-        if (!initialized) {
+        if(!RanOnce){
+            RanOnce = true;
             Actions();
-            initialized = true;
         }
-        return Conditions();
+        boolean result = Conditions();
+        if(result)
+            RanOnce = false;
+        return result;
     }
 
     // You override this instead of Run()

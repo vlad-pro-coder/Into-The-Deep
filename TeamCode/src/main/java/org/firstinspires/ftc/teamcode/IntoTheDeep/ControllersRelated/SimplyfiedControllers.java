@@ -3,14 +3,16 @@ package org.firstinspires.ftc.teamcode.IntoTheDeep.ControllersRelated;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.internal.ui.GamepadUser;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 
 public class SimplyfiedControllers extends Gamepad {
     private double LastCirclePressed,LastCrossPressed,LastSquarePressed,LastTrianglePressed;
-    public static double TimeForIdentificationHolding = 0.1;
-    public static Gamepad lastState;
-    public SimplyfiedControllers(int gmID){//1 sau 2
-        setGamepadId(gmID);
-        lastState.copy(this);
+    private final double TimeForIdentificationHolding = 2;
+    private Gamepad lastState = new Gamepad();
+    private Gamepad ChosenGM;
+
+    public SimplyfiedControllers(Gamepad gm){//1 sau 2
+        this.ChosenGM = gm;
     }
 
     public boolean triangleWasPressed(){
@@ -42,10 +44,12 @@ public class SimplyfiedControllers extends Gamepad {
         return this.circle && System.currentTimeMillis() * 1000 - LastCirclePressed > TimeForIdentificationHolding;
     }
     public boolean IsCrossHeld(){
-        return this.cross && System.currentTimeMillis() * 1000 - LastCrossPressed > TimeForIdentificationHolding;
+        return this.cross && ((System.currentTimeMillis() * 1000 - LastCrossPressed) > TimeForIdentificationHolding);
     }
 
     public void update(){//if update not called isHeld will always be true
+        this.copy(ChosenGM);
+        RobotInitializers.Dashtelemetry.addData("is anytime different",ChosenGM.cross != lastState.cross);
         if(triangleWasPressed())
             LastTrianglePressed = System.currentTimeMillis() * 1000;
         if(squareWasPressed())
@@ -54,6 +58,7 @@ public class SimplyfiedControllers extends Gamepad {
             LastCirclePressed = System.currentTimeMillis() * 1000;
         if(crossWasPressed())
             LastCrossPressed = System.currentTimeMillis() * 1000;
+
         lastState.copy(this);
     }
 

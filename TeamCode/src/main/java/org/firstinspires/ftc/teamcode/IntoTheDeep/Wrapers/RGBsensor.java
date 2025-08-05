@@ -1,15 +1,21 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers;
 
-import com.qualcomm.hardware.broadcom.BroadcomColorSensor;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchSimple;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.configuration.annotations.DeviceProperties;
+import com.qualcomm.robotcore.hardware.configuration.annotations.I2cDeviceType;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.Colors;
 
+@I2cDeviceType
+@DeviceProperties(
+        xmlTag = "RGBsensor",
+        name = "RGB sensor - REV 3"
+)
 public class RGBsensor extends RevColorSensorV3 implements HardwareDevice {
     public class ColorRangeSensorPacket {
         public double R, G, B, A;

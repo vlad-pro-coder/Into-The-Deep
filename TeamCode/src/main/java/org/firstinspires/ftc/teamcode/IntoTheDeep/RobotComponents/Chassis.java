@@ -13,26 +13,22 @@ public class Chassis {
 
     public static CachedMotor FL, FR, BL, BR;
     public static SparkFunOTOS.Pose2D target = new SparkFunOTOS.Pose2D(0,0,0);
-    public static PIDController Strafe = new PIDController(0,0,0),
-            Forward = new PIDController(0,0,0),
-            Heading = new PIDController(0,0,0);
+    public static PIDController Strafe = new PIDController(-0.015,0,-0.002),
+            Forward = new PIDController(0.006,0,0.0015),
+            Heading = new PIDController(1.1,0,0.06);
 
     static{
         Strafe.setFreq(30);
         Forward.setFreq(30);
         Heading.setFreq(30);
 
-        //Strafe.kS = -0.0;
-        //Forward.kS = 0.00;
-        //Heading.kS = -0.045; //-0.035
+        Strafe.kS = -0.0;
+        Forward.kS = 0.00;
+        Heading.kS = -0.045; //-0.035
 
     }
 
     public static void drive(double x, double y, double r){
-        RobotInitializers.telemetry.addData("FL PC", FL.getCurrent(CurrentUnit.AMPS));
-        RobotInitializers.telemetry.addData("FR PC", FR.getCurrent(CurrentUnit.AMPS));
-        RobotInitializers.telemetry.addData("BL PC", BL.getCurrent(CurrentUnit.AMPS));
-        RobotInitializers.telemetry.addData("BR PC", BR.getCurrent(CurrentUnit.AMPS));
         double d = Math.max(Math.abs(x) + Math.abs(y) + Math.abs(r), 1);
         double fl, bl, fr, br;
 
@@ -60,6 +56,13 @@ public class Chassis {
         return target;
     }
 
+    public static boolean IsPositionDone(double error_distance){
+        return Localizer.getDistanceFromTwoPoints(getTargetPosition(),Localizer.getCurrentPosition()) <= error_distance;
+    }
+    public static boolean IsHeadingDone(double error_heading){
+        return Localizer.getAngleDifference(getTargetPosition().h,Localizer.getCurrentPosition().h) <= error_heading;
+    }
+
 
     public static void update(){
         SparkFunOTOS.Pose2D normal = new SparkFunOTOS.Pose2D(
@@ -77,13 +80,13 @@ public class Chassis {
                 Herror
         );
 
-        double xP = Strafe.calculatePower(error.x);
-        double yP = Forward.calculatePower(error.y);
+        double xP = Forward.calculatePower(error.x);
+        double yP = Strafe.calculatePower(error.y);
         double hP = Heading.calculatePower(error.h);
 
-        RobotInitializers.telemetry.addData("xError", error.x);
-        RobotInitializers.telemetry.addData("yError", error.y);
-        RobotInitializers.telemetry.addData("hError", Math.toDegrees(error.h));
+        RobotInitializers.Dashtelemetry.addData("xError", error.x);
+        RobotInitializers.Dashtelemetry.addData("yError", error.y);
+        RobotInitializers.Dashtelemetry.addData("hError", Math.toDegrees(error.h));
         double p = 1;
         /*if(RobotInitializers.VOLTAGE > 12.8){
             p *= 12.8 / RobotInitializers.VOLTAGE;

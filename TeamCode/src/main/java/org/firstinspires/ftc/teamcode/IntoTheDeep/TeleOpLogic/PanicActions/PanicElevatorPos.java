@@ -11,12 +11,12 @@ public class PanicElevatorPos {
                 @Override
                 protected void Actions() {
                     Lift.state = Lift.LIFTSTATES.FREEWILL;
-                    Lift.setLiftPos(Lift.MaxHighBasketPos);
+                    Lift.setLiftPos(Lift.HighBasketPos);
                 }
 
                 @Override
                 protected boolean Conditions() {
-                    return true;
+                    return Lift.IsLiftDone(30);
                 }
             });
 
@@ -29,7 +29,7 @@ public class PanicElevatorPos {
 
                 @Override
                 protected boolean Conditions() {
-                    return true;
+                    return Lift.IsLiftDone(30);
                 }
             });
 }

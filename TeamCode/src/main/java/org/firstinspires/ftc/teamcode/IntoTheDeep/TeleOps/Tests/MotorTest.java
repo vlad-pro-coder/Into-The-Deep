@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 
 @TeleOp
@@ -16,8 +17,7 @@ public class MotorTest extends LinearOpMode {
     public static ServoTest.Hubs hub = ServoTest.Hubs.ControlHub;
     @Override
     public void runOpMode() throws InterruptedException {
-        RobotInitializers.InitializeHubs(hardwareMap);
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        RobotInitializers.InitializeFull(hardwareMap);
 
         waitForStart();
 
@@ -29,11 +29,12 @@ public class MotorTest extends LinearOpMode {
             }
 
             for(int i = 0; i < 4; i++){
-                telemetry.addData("c" + i, RobotInitializers.ControlHubMotors.getMotorCurrentPosition(i));
-                telemetry.addData("e" + i, RobotInitializers.ExpansionHubMotors.getMotorCurrentPosition(i));
+                RobotInitializers.Dashtelemetry.addData("c" + i, RobotInitializers.ControlHubMotors.getMotorCurrentPosition(i));
+                RobotInitializers.Dashtelemetry.addData("e" + i, RobotInitializers.ExpansionHubMotors.getMotorCurrentPosition(i));
             }
             RobotInitializers.clearCache();
 
+            Localizer.Update();
             telemetry.update();
         }
     }

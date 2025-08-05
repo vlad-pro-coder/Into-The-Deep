@@ -81,7 +81,7 @@ public class Localizer {
         velocity.x /= time.seconds();
         velocity.y /= time.seconds();
 
-        RobotInitializers.telemetry.addData("pose", "(" + getCurrentPosition().x + ", " + getCurrentPosition().y + ", " + Math.toDegrees(getCurrentPosition().h) + "deg)");
+        RobotInitializers.Dashtelemetry.addData("pose", "(" + getCurrentPosition().x + ", " + getCurrentPosition().y + ", " + Math.toDegrees(getCurrentPosition().h) + "deg)");
 //        RobotLog.dd("pose", "(" + getCurrentPosition().x + ", " + getCurrentPosition().y + ", " + Math.toDegrees(getCurrentPosition().h) + "deg)");
         time.reset();
     }

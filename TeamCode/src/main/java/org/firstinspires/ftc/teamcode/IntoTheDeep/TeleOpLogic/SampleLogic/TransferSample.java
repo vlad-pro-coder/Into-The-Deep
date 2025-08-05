@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic;
 
+
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Scheduler;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Task;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
@@ -19,6 +20,7 @@ public class TransferSample {
                     Outtake.OverHead_TAKESAMPLE();
                     Intake.RotateToStore();
                     Extendo.state = Extendo.ExtendoStates.RETRACTING;
+                    Intake.DropUp();
                 }
 
                 @Override
@@ -26,7 +28,7 @@ public class TransferSample {
                     return true;
                 }
             })
-            .waitSeconds(0.05)
+            .waitSeconds(0.3)
             .addTask(new Task() {
                 @Override
                 protected void Actions() {
@@ -38,19 +40,21 @@ public class TransferSample {
                 protected boolean Conditions() {
                     return Extendo.getPosition() < 20 && Lift.getPosition() < 20;
                 }
-            }).addTask(new Task() {
+            })
+            .waitSeconds(0.15)
+            .addTask(new Task() {
                 @Override
                 protected void Actions() {
                     Intake.StopSpinner();
-                    Outtake.setExtensionPos(0.24);
+                    Outtake.setExtensionPos(0.3);
                 }
 
                 @Override
                 protected boolean Conditions() {
-                    return true;
+                    return Outtake.OverHeadDoneness();
                 }
             })
-            .waitSeconds(0.05)
+            .waitSeconds(0.15)
             .addTask(new Task() {
                 @Override
                 protected void Actions() {
@@ -59,6 +63,16 @@ public class TransferSample {
                 @Override
                 protected boolean Conditions() {
                     return Outtake.IsClawDone();
+                }
+            })
+            .addTask(new Task() {
+                @Override
+                protected void Actions() {
+                    Lift.state = Lift.LIFTSTATES.OFF;
+                }
+                @Override
+                protected boolean Conditions() {
+                    return true;
                 }
             });
 }

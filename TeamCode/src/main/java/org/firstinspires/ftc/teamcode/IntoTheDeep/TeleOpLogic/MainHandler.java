@@ -12,7 +12,9 @@ import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleopsStarter.gm1;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleopsStarter.gm2;
 
+
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Scheduler;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
@@ -25,8 +27,11 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializ
 public class MainHandler {
 
     Scheduler currentTasks;
+    private boolean DidLiftSampleUp = false;
     modes mode = modes.SAMPLES;
     ActionStates CurrentState = ActionStates.SAMPLETRANSFER;
+    Gamepad prev1 = new Gamepad();
+    Gamepad prev2 = new Gamepad();
 
     public MainHandler(){
         currentTasks = new Scheduler();
@@ -49,7 +54,7 @@ public class MainHandler {
 
     public void IntakeActions(){
         if(Extendo.state != Extendo.ExtendoStates.FREEWILL) {
-            RobotInitializers.telemetry.addLine("error cannot move extendo in free to move intake");
+            RobotInitializers.Dashtelemetry.addLine("error cannot move extendo in free to move intake");
             return;
         }
 
@@ -65,6 +70,7 @@ public class MainHandler {
         }
         else {
             Intake.DropUp();
+            Intake.StopSpinner();
             if(Intake.HasMixedTeamPiece())
                 Intake.Block();
             else
@@ -77,7 +83,7 @@ public class MainHandler {
 
         IntakeActions();
 
-        if(gm2.triangleWasPressed() && currentTasks.IsSchedulerDone()){
+        if(gm2.triangle!=prev2.triangle && gm2.triangle && currentTasks.IsSchedulerDone()){
             if(mode == modes.SAMPLES && CurrentState == ActionStates.SPECIMENGRABANDSTAYIDLE){
                 currentTasks.AddAnotherScheduler(SwitchToSpecsActions);
                 mode = modes.SPECIMENS;
@@ -90,7 +96,7 @@ public class MainHandler {
             }
         }
 
-        if(gm2.circleWasPressed())
+        if(gm1.circle != prev1.circle && gm1.circle)
         {
             currentTasks.clear();
             currentTasks.AddAnotherScheduler(PanicResetActions);
@@ -99,9 +105,9 @@ public class MainHandler {
             else
                 CurrentState = ActionStates.SPECIMENGRABANDSTAYIDLE;
         }
-        if(gm2.IsCircleHeld() && gm2.dpadUpWasPressed())
+        if(gm1.circle && gm1.dpad_up != prev1.dpad_up && gm1.dpad_up)
             currentTasks.AddAnotherScheduler(PanicElevatorUpActions);
-        if(gm2.circleWasPressed() && gm2.dpadDownWasPressed())
+        if(gm1.circle && gm1.dpad_down != prev1.dpad_down && gm1.dpad_down)
             currentTasks.AddAnotherScheduler(PanicElevatorDownActions);
 
 
@@ -109,24 +115,31 @@ public class MainHandler {
             case SAMPLES:
                 switch (CurrentState){
                     case SAMPLETRANSFER:
-                        if(currentTasks.IsSchedulerDone() && (Intake.HasMixedTeamPiece() || gm2.squareWasPressed())) {
+                        if(currentTasks.IsSchedulerDone() && (Intake.HasMixedTeamPiece() || (gm2.square != prev2.square && gm2.square))) {
                             currentTasks.AddAnotherScheduler(TransferSampleActions);
                             CurrentState = ActionStates.SAMPLEBASKET;
                         }
                         break;
                     case SAMPLEBASKET:
                         if(currentTasks.IsSchedulerDone()) {
-                            if(gm2.dpadUpWasPressed())
+                            if(gm1.dpad_up != prev1.dpad_up && gm1.dpad_up) {
                                 currentTasks.AddAnotherScheduler(HighBasketScoreActions);
-                            if(gm2.dpadDownWasPressed())
+                                DidLiftSampleUp = true;
+                            }
+                            if(gm1.dpad_down != prev1.dpad_down && gm1.dpad_down) {
                                 currentTasks.AddAnotherScheduler(LowBasketScoreActions);
-                            if(gm1.squareWasPressed())
+                                DidLiftSampleUp = true;
+                            }
+                            if(gm1.square != prev1.square && gm1.square && DidLiftSampleUp)
                                 CurrentState = ActionStates.RETRACTINGSAMPLE;
                         }
                         break;
                     case RETRACTINGSAMPLE:
-                        currentTasks.AddAnotherScheduler(DropSampleAndRetractActions);
-                        CurrentState = ActionStates.SAMPLETRANSFER;
+                        if(currentTasks.IsSchedulerDone()) {
+                            currentTasks.AddAnotherScheduler(DropSampleAndRetractActions);
+                            CurrentState = ActionStates.SAMPLETRANSFER;
+                            DidLiftSampleUp = false;
+                        }
                         break;
                 }
                 break;
@@ -136,10 +149,10 @@ public class MainHandler {
                 break;
         }
 
+        RobotInitializers.Dashtelemetry.addData("length current tasks",currentTasks.tasks.size());
 
         currentTasks.update();
-        Lift.update();
-        Extendo.update();
-        Outtake.update();
+        prev1.copy(gm1);
+        prev2.copy(gm2);
     }
 }

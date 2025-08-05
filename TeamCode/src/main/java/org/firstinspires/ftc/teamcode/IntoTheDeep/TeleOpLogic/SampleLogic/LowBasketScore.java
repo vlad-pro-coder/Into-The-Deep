@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic;
 
+
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Scheduler;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Task;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Lift;
@@ -13,11 +14,12 @@ public class LowBasketScore {
                 protected void Actions() {
                     Lift.state = Lift.LIFTSTATES.LOWBASKET;
                     Outtake.OverHead_BASKETMOVINGSAFEPOS();
+                    Lift.setLiftPos(Lift.LowBasketPos);
                 }
 
                 @Override
                 protected boolean Conditions() {
-                    return Math.abs(Lift.getPosition() - Lift.LowBasketPos) < 40 && Outtake.OverHeadDoneness();
+                    return Lift.getPosition() > Lift.LowBasketPos - 200 && Outtake.OverHeadDoneness(30);
                 }
             })
             .addTask(new Task() {
