@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples;
 
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.ApproachingSubmersibleActions.AfterThirdSampleGoToSubmersible.AfterThirdSampleGoToSubmersibleActions;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.ApproachingSubmersibleActions.TakeSubmersibleSampleToHighBasket.GoingBackAndForthToHighBasketAndSubmersibleActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.AutoConstants.CHASSIS_sample1pos;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.AutoConstants.CHASSIS_sample2pos;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.AutoConstants.CHASSIS_sample3pos;
@@ -27,31 +29,30 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializ
 @Config
 public class Samples extends LinearOpMode {
     public enum RobotStates{
-        PUTPRELOAD,
-        RETRACT,
-        PUTFIRSTSAMPLE,
-        PUTSECONDSAMPLE,
-        PUTTHIRDSAMPLE,
-        GOTOSUBMERSIBLE,
+        OCCUPIEDPRELOADS,
+        DETECTIONGRAB,
+        FAILEDTOGRABFROMSUBMERSIBLE,
+        SUBMERSIBLESAMPLEDOCYCLE,
     }
     public boolean WereInstructionGiven = false;
-    public RobotStates robotstate = RobotStates.PUTPRELOAD;
-    public double currentpredefinedsamples = 1;
+    public RobotStates robotstate = RobotStates.OCCUPIEDPRELOADS;
+    public boolean everpurepersuit = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
         RobotInitializers.InitializeFull(hardwareMap);
         RobotInitializers.InitializeForOperation();
         Scheduler tasks = new Scheduler();
-        tasks.AddAnotherScheduler(SimultaniosSampleGrabingScoringActions(CHASSIS_sample1pos,EXTENDO_sample1,1));
+        /*tasks.AddAnotherScheduler(SimultaniosSampleGrabingScoringActions(CHASSIS_sample1pos,EXTENDO_sample1,1));
         tasks.AddAnotherScheduler(SimultaniosSampleGrabingScoringActions(CHASSIS_sample2pos,EXTENDO_sample2,1));
         tasks.AddAnotherScheduler(SimultaniosSampleGrabingScoringActions(CHASSIS_sample3pos,EXTENDO_sample3,1));
-        tasks.AddAnotherScheduler(PutLastSamplePredefinedActions);
+        tasks.AddAnotherScheduler(PutLastSamplePredefinedActions);*/
+        tasks.AddAnotherScheduler(AfterThirdSampleGoToSubmersibleActions);
+        tasks.AddAnotherScheduler(GoingBackAndForthToHighBasketAndSubmersibleActions);
 
-
+        Chassis.usedTrajectory = Chassis.trajectoryStates.FREEWILL;
         Lift.DoingAuto = true;
         Extendo.DoingAuto = true;
-
 
         while(opModeInInit()){
             RobotInitializers.clearCache(false);
@@ -71,11 +72,10 @@ public class Samples extends LinearOpMode {
         {
             RobotInitializers.clearCache();
 
-            RobotInitializers.Dashtelemetry.addData("robot states", robotstate);
-            RobotInitializers.Dashtelemetry.addData("lift target pos", Lift.pidController.getTargetPosition());
             RobotInitializers.Dashtelemetry.addData("is Scheduler done", tasks.tasks.size());
-            RobotInitializers.Dashtelemetry.addData("storage status", Intake.HasMixedTeamPiece());
 
+            RobotInitializers.Dashtelemetry.addData("location done",Chassis.IsPositionDone(500));
+            RobotInitializers.Dashtelemetry.addData("angle done",Chassis.IsHeadingDone(30));
 
             Chassis.update();
             Lift.update();

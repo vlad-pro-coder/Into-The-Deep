@@ -20,7 +20,7 @@ public class Outtake {
     public static AsymmetricMotionProfile armProfile,ExtensionProfile;
     public static double extendoPos = 115, retractPos = 315;
     public static double ClawOpenPos = 140, ClawClosePos = 45;
-    public static double OverHeadTakeSampPos = 355,OverHeadOverBasketPos = 90, OverHeadTakeSpecPos = 0,
+    public static double OverHeadTakeSampPos = 354,OverHeadOverBasketPos = 90, OverHeadTakeSpecPos = 0,
             OverHeadScoreSpecPos = 0,OverHeadBasketMovingSafePos = 180;
     private static double tmp = 0;
     static {
@@ -31,14 +31,14 @@ public class Outtake {
 
     public static void closeClaw(){
         Claw.setAngle(ClawClosePos);
-        tmp = System.currentTimeMillis() * 1000;
+        tmp = System.currentTimeMillis() / 1000.0;
     }
     public static void openClaw(){
         Claw.setAngle(ClawOpenPos);
-        tmp = System.currentTimeMillis() * 1000;
+        tmp = System.currentTimeMillis() / 1000.0;
     }
     public static boolean IsClawDone(){
-        return System.currentTimeMillis() * 1000 - tmp > 0.9;
+        return System.currentTimeMillis() / 1000.0 - tmp > 0.1;
     }
 
     public static void setOverHeadPos(double targetPos) {

@@ -71,7 +71,6 @@ public class Lift {
     }
 
     public static void update(){
-        Dashtelemetry.addData("lift state",state);
         switch (state){
             case OFF:
                 setLiftPower(0);

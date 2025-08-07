@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.TEAM;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.CachedMotor;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.RGBsensor;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.RangeSensor;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.ServoPlus;
 @Config
 public class Intake {
@@ -25,8 +26,9 @@ public class Intake {
     public static ServoPlus blocker,dropdownServo;
     public static CachedMotor spinner;
     public static RGBsensor colorsensor;
+    public static RangeSensor rangesensor;
     public static double dropdownAngle = 185,dropupAngle = 290,startDropDownUpCorrection = 230;
-    public static double NotBlockingPos = 25,BlockingPos = 170;
+    public static double NotBlockingPos = 27,BlockingPos = 170;
 
 
     public static void Block(){
@@ -73,6 +75,9 @@ public class Intake {
             default:
                 return SampleType.NONE;
         }
+    }
+    public static boolean SampleReachedTrapDoor(){
+        return rangesensor.getDist() <= 5.5;//in cm
     }
 
     public static boolean HasExactTeamPiece(){

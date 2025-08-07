@@ -6,38 +6,24 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
-import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 
-import java.util.List;
-import java.util.Vector;
-import java.util.stream.Collectors;
 
 @Config
-public class GetPositionSample {
-    public static double initialAngle = Math.toRadians(15), h = 270.78, centerToExtendo = 140;// COY = 140
-    public static double cameraOffsetX = 140.148, cameraOffsetY = 100;
+public class GetSamplePosition {
+    public static double spool = 16,RA=4.75;
+    public static int CPR = 28;
+    public static double ExtendoToDistance(int e){
+        return (2*Math.PI*spool/RA) * ((double)e/CPR);
+    }
+    public static double initialAngle = Math.toRadians(25), h = 261.817, centerToExtendo = 140;// COY = 140
+    public static double cameraOffsetX = 142.621, cameraOffsetY = 107.053;
     public static double centerOffsetToDownRightX = 135.64,centerOffsetToDownRightY = 158.502;
     public static double CameraAngleFromCenterPoint = Math.atan(cameraOffsetY/cameraOffsetX);//de schimbat
-
-
-    public static final double spool = 16, RA = 4.75;
-    public static final int CPR = 28;
     public static int MMToEncoderTicks(double distance){
         return (int)(distance / (2 * Math.PI * 16 / 4.75)) * 28;
-    }
-    public static double ExtendoToDistance(int e){
-        return (2 * Math.PI * spool / RA) * ((double) e / CPR);
-    }
-
-    public static Intake.SampleType getType(int type){
-        if(type == 0) return Intake.SampleType.BLUE;
-        if(type == 1) return  Intake.SampleType.RED;
-        if(type == 2) return Intake.SampleType.YELLOW;
-        return Intake.SampleType.NONE;
     }
 
     public static boolean hasId(LLResult res, int id){
@@ -48,64 +34,7 @@ public class GetPositionSample {
     }
 
     public static double middleX = 630, middleY = -1600;
-
-    @Deprecated
-    public static LLResultTypes.DetectorResult getOptimalResultSmort(LLResult camera, int targetID){
-        List<LLResultTypes.DetectorResult> detections = camera.getDetectorResults();
-
-        // split the list into two separate lists
-        List<LLResultTypes.DetectorResult> targetSamples = detections.stream().filter(e -> e.getClassId() == targetID).collect(Collectors.toList());
-        detections = detections.stream().filter(e -> e.getClassId() != targetID).collect(Collectors.toList());
-        for(LLResultTypes.DetectorResult detection : targetSamples){
-            double distSampleRobot = getExtendoRotPair(detection.getTargetXDegreesNoCrosshair(), detection.getTargetYDegreesNoCrosshair()).x;
-//            double distRobotToBar = Math.abs(XBarSub - Localizer.getCurrentPosition().x);
-            double distRobotToBar = 100;
-            double distRobotToSubBar = distRobotToBar / Math.cos(Localizer.getCurrentPosition().h);
-
-            if(distSampleRobot >= distRobotToSubBar + 10 - centerToExtendo && // not close to a bar
-                    distSampleRobot <= ExtendoToDistance(Extendo.MaxExtension - 100) + centerToExtendo // not too far away
-                /*&& getPositionRelativeToRobot(detection.getTargetXDegrees(), detection.getTargetYDegrees()).y + Localizer.getCurrentPosition().y < halfYTerrain*/
-                //TODO: putini vecini aproape
-
-            ){
-                return detection;
-            }
-        }
-        return targetSamples.get(0);
-    }
-    public static double XBarSub = 0, halfYTerrain = 0;
-    public static LLResultTypes.DetectorResult getOptimalResult(LLResult result, int targetID){
-        List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
-
-        // split the list into two separate lists
-        List<LLResultTypes.DetectorResult> targetSamples = detections.stream().filter(e -> e.getClassId() == targetID).collect(Collectors.toList());
-        detections = detections.stream().filter(e -> e.getClassId() != targetID).collect(Collectors.toList());
-//        double score[] = new double[targetSamples.size()];
-        double max = -1;
-        int id = 0;
-//        for(LLResultTypes.DetectorResult detection : targetSamples){
-        for(int i = 0; i < targetSamples.size(); i ++){
-            LLResultTypes.DetectorResult detection = targetSamples.get(i);
-            double distSampleRobot = getExtendoRotPair(detection.getTargetXDegreesNoCrosshair(), detection.getTargetYDegreesNoCrosshair()).x;
-//            double distRobotToBar = Math.abs(XBarSub - Localizer.getCurrentPosition().x);
-            double distRobotToBar = 200;
-            double distRobotToSubBar = distRobotToBar / Math.cos(Localizer.getCurrentPosition().h);
-
-            if(distSampleRobot <= ExtendoToDistance(Extendo.MaxExtension - 50) - centerToExtendo){
-//                double score = Math.sqrt(detection.getTargetXPixels() * detection.getTargetXPixels() + detection.getTargetYPixels() * detection.getTargetYPixels());
-                double score = detection.getTargetArea();
-//                if(Localizer.getCurrentPosition().y + lateralT < middleY) score = 1e8;
-                if(score > max){
-                    id = i;
-                    max = score;
-                }
-//                return detection;
-            }
-        }
-        if(targetSamples.isEmpty()) return null;
-        return targetSamples.get(id);
-    }
-
+    public static double XBarSub = 0, halfYTerrain = -1500;
     public static SparkFunOTOS.Pose2D getPositionRelativeToRobot(SparkFunOTOS.Pose2D fieldPos){
         double d = Localizer.getDistanceFromTwoPoints(fieldPos, Localizer.getCurrentPosition());
         double t = Localizer.getCurrentPosition().h - Math.atan2(fieldPos.y, fieldPos.x);
@@ -193,13 +122,13 @@ public class GetPositionSample {
             normalizedDegrees =  Math.PI*2 + posRobot.h;
 
         //to change if wrong
-        double NaturalDisplacement = Math.PI/2;
+        double NaturalDisplacement = 0;
 
         normalizedDegrees += NaturalDisplacement;
         if(normalizedDegrees > Math.PI*2)
             normalizedDegrees -= Math.PI*2;
 
-        return new SparkFunOTOS.Pose2D(posRobot.y,-posRobot.x, normalizedDegrees) ;
+        return new SparkFunOTOS.Pose2D(-posRobot.x,-posRobot.y, normalizedDegrees) ;
     }
 
     public static SparkFunOTOS.Pose2D CameraRelativeToField(SparkFunOTOS.Pose2D positionRobot){
@@ -208,8 +137,8 @@ public class GetPositionSample {
 
         double z = Math.hypot(cameraOffsetX,cameraOffsetY);
 
-        double XcameraField = NormalizepositionRobot.x + -z * Math.sin((positionRobot.h + CameraAngleFromCenterPoint)%(2*Math.PI));
-        double YcameraField = NormalizepositionRobot.y + z * Math.cos((positionRobot.h + CameraAngleFromCenterPoint)%(2*Math.PI));
+        double XcameraField = NormalizepositionRobot.x + z * Math.cos((positionRobot.h + CameraAngleFromCenterPoint)%(2*Math.PI));
+        double YcameraField = NormalizepositionRobot.y + z * Math.sin((positionRobot.h + CameraAngleFromCenterPoint)%(2*Math.PI));
 
         return new SparkFunOTOS.Pose2D(XcameraField,YcameraField,0);
     }
@@ -217,13 +146,13 @@ public class GetPositionSample {
     public static SparkFunOTOS.Pose2D GetExtendoTicksToTravelAndNeededAngle(double tx,double ty) {
 
         SparkFunOTOS.Pose2D pos = Localizer.getCurrentPosition();
-        SparkFunOTOS.Pose2D normalizedPos = GetPositionSample.normalize_pos(pos);
+        SparkFunOTOS.Pose2D normalizedPos = normalize_pos(pos);
 
-        SparkFunOTOS.Pose2D poscamera = GetPositionSample.CameraRelativeToField(pos);
+        SparkFunOTOS.Pose2D poscamera = CameraRelativeToField(pos);
 
-        SparkFunOTOS.Pose2D pos_sample = GetPositionSample.getSamplePositionRelativeToCamera(tx,ty);
+        SparkFunOTOS.Pose2D pos_sample = getSamplePositionRelativeToCamera(tx,ty);
 
-        SparkFunOTOS.Pose2D SampleFieldPos = GetPositionSample.getSampleRelativeToField(poscamera,normalizedPos.h,pos_sample);
+        SparkFunOTOS.Pose2D SampleFieldPos = getSampleRelativeToField(poscamera,normalizedPos.h,pos_sample);
 
         double delta_x = SampleFieldPos.x - normalizedPos.x;
         double delta_y = SampleFieldPos.y - normalizedPos.y;
@@ -241,7 +170,7 @@ public class GetPositionSample {
     public static SparkFunOTOS.Pose2D GetExtendoTicksToTravelAndNeededAngleFromSample(SparkFunOTOS.Pose2D SampleFieldPos){
 
         SparkFunOTOS.Pose2D pos = Localizer.getCurrentPosition();
-        SparkFunOTOS.Pose2D normalizedPos = GetPositionSample.normalize_pos(pos);
+        SparkFunOTOS.Pose2D normalizedPos = normalize_pos(pos);
 
         double delta_x = SampleFieldPos.x - normalizedPos.x;
         double delta_y = SampleFieldPos.y - normalizedPos.y;
@@ -258,7 +187,7 @@ public class GetPositionSample {
 
     public static SparkFunOTOS.Pose2D getContinuosTrackingData(SparkFunOTOS.Pose2D SampleFieldPos){
         SparkFunOTOS.Pose2D pos = Localizer.getCurrentPosition();
-        SparkFunOTOS.Pose2D normalizedPos = GetPositionSample.normalize_pos(pos);
+        SparkFunOTOS.Pose2D normalizedPos = normalize_pos(pos);
 
         double delta_x = SampleFieldPos.x - normalizedPos.x;
         double delta_y = SampleFieldPos.y - normalizedPos.y;
@@ -274,41 +203,13 @@ public class GetPositionSample {
 
     public static SparkFunOTOS.Pose2D GetGlobalSamplePosition(double tx,double ty){
         SparkFunOTOS.Pose2D pos = Localizer.getCurrentPosition();
-        SparkFunOTOS.Pose2D normalizedPos = GetPositionSample.normalize_pos(pos);
+        SparkFunOTOS.Pose2D normalizedPos = normalize_pos(pos);
 
-        SparkFunOTOS.Pose2D poscamera = GetPositionSample.CameraRelativeToField(pos);
+        SparkFunOTOS.Pose2D poscamera = CameraRelativeToField(pos);
 
-        SparkFunOTOS.Pose2D pos_sample = GetPositionSample.getSamplePositionRelativeToCamera(tx,ty);
+        SparkFunOTOS.Pose2D pos_sample = getSamplePositionRelativeToCamera(tx,ty);
 
-        return GetPositionSample.getSampleRelativeToField(poscamera,normalizedPos.h,pos_sample);
+        return getSampleRelativeToField(poscamera,normalizedPos.h,pos_sample);
 
-    }
-
-    public static SparkFunOTOS.Pose2D CalculatePosFromMultipleScreenShots(Vector<SparkFunOTOS.Pose2D> Poses){
-
-        SparkFunOTOS.Pose2D median = new SparkFunOTOS.Pose2D(0,0,0);
-        for(SparkFunOTOS.Pose2D pos:Poses){
-            median.x+=pos.x;
-            median.y+=pos.y;
-        }
-
-        median.x /= Poses.size();
-        median.y /= Poses.size();
-
-
-        double mini = 1e9;
-
-        SparkFunOTOS.Pose2D best = new SparkFunOTOS.Pose2D(0,0,0);
-
-        for(SparkFunOTOS.Pose2D pos:Poses){
-            double temp = Localizer.getDistanceFromTwoPoints(pos,median);
-            if(temp < mini)
-            {
-                mini = temp;
-                best = pos;
-            }
-        }
-
-        return best;
     }
 }

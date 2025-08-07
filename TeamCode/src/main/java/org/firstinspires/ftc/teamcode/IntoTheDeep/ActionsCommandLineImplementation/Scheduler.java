@@ -1,9 +1,13 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation;
 
+import org.firstinspires.ftc.teamcode.IntoTheDeep.Pathing.PurePersuit;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Chassis;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class Scheduler {
@@ -56,6 +60,22 @@ public class Scheduler {
                 boolean r = (System.currentTimeMillis() - track) >= wait;
                 if (r) track = -1;
                 return r;
+            }
+        });
+        return this;
+    }
+
+    public Scheduler StartPurePersuit(ArrayList<PurePersuit.Point>points,double TargetHeading,double radius){
+        addTask(new Task() {
+            @Override
+            protected void Actions() {
+                Chassis.PurePersuitTrajectory = new PurePersuit(points,TargetHeading,radius);
+                Chassis.usedTrajectory = Chassis.trajectoryStates.FOLLOWINGPUREPERSUIT;
+            }
+
+            @Override
+            protected boolean Conditions() {
+                return true;
             }
         });
         return this;

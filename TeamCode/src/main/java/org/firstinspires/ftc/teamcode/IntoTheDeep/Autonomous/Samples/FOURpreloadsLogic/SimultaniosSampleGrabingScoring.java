@@ -51,7 +51,7 @@ public class SimultaniosSampleGrabingScoring {
                         Lift.setLiftPos(LIFT_highbasket);
                         Outtake.setOverHeadPos(OVERHEAD_overbasketbeforeslam);
                         Outtake.setExtensionPos(EXTENSION_overbasket);
-                        Extendo.setExtendoPos(ExtendoPos-120);
+                        Extendo.setExtendoPos(ExtendoPos-200);
                         Intake.Unblock();
                     }
 
@@ -135,7 +135,7 @@ public class SimultaniosSampleGrabingScoring {
 
                         boolean r = (System.currentTimeMillis() - track) >= wait;
                         if (r) track = -1;
-                        return Intake.HasMixedTeamPiece() || r;
+                        return (Intake.HasMixedTeamPiece() && Intake.SampleReachedTrapDoor()) || r;
                     }
                 })
                 .addTask(new Task() {

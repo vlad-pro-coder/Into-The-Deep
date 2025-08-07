@@ -9,10 +9,12 @@ public abstract class Task {
             RanOnce = true;
             Actions();
         }
-        boolean result = Conditions();
-        if(result)
+
+        if(Conditions()) {
             RanOnce = false;
-        return result;
+            return true;
+        }
+        return false;
     }
 
     // You override this instead of Run()

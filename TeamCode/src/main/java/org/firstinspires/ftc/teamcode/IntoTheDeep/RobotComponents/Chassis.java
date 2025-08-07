@@ -6,12 +6,20 @@ import com.qualcomm.robotcore.hardware.PIDCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.PIDController;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.Pathing.PurePersuit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.CachedMotor;
 
 @Config
 public class Chassis {
 
     public static CachedMotor FL, FR, BL, BR;
+    public static PurePersuit PurePersuitTrajectory;
+    public enum trajectoryStates{
+        FREEWILL,
+        FOLLOWINGPUREPERSUIT,
+        FOLLOWINGBEZIERCURVE,
+    }
+    public static trajectoryStates usedTrajectory = trajectoryStates.FREEWILL;
     public static SparkFunOTOS.Pose2D target = new SparkFunOTOS.Pose2D(0,0,0);
     public static PIDController Strafe = new PIDController(-0.015,0,-0.002),
             Forward = new PIDController(0.006,0,0.0015),
@@ -55,16 +63,44 @@ public class Chassis {
     public static SparkFunOTOS.Pose2D getTargetPosition(){
         return target;
     }
+    public static void setHeading(double heading){
+        setTargetPosition(new SparkFunOTOS.Pose2D(target.x, target.y, heading));
+    }
 
     public static boolean IsPositionDone(double error_distance){
-        return Localizer.getDistanceFromTwoPoints(getTargetPosition(),Localizer.getCurrentPosition()) <= error_distance;
+        switch (usedTrajectory){
+            case FREEWILL:
+                return Localizer.getDistanceFromTwoPoints(getTargetPosition(),Localizer.getCurrentPosition()) <= error_distance;
+            case FOLLOWINGPUREPERSUIT:
+                return PurePersuitTrajectory.TrajectoryDone(error_distance);
+            case FOLLOWINGBEZIERCURVE:
+                //maybe in the future
+        }
+        return false;
     }
     public static boolean IsHeadingDone(double error_heading){
-        return Localizer.getAngleDifference(getTargetPosition().h,Localizer.getCurrentPosition().h) <= error_heading;
+        switch (usedTrajectory){
+            case FREEWILL:
+                return Localizer.getAngleDifference(getTargetPosition().h,Localizer.getCurrentPosition().h) <= error_heading;
+            case FOLLOWINGPUREPERSUIT:
+                return PurePersuitTrajectory.AngleDone(error_heading);
+            case FOLLOWINGBEZIERCURVE:
+                //maybe in the future
+        }
+       return false;
     }
 
 
     public static void update(){
+
+        switch (usedTrajectory){
+            case FOLLOWINGPUREPERSUIT:
+                setTargetPosition(PurePersuitTrajectory.FromLinesGeneratePointToFollow());
+                break;
+            case FOLLOWINGBEZIERCURVE:
+                //maybe in the future
+                break;
+        }
         SparkFunOTOS.Pose2D normal = new SparkFunOTOS.Pose2D(
                 getTargetPosition().x - Localizer.getCurrentPosition().x,
                 getTargetPosition().y - Localizer.getCurrentPosition().y,

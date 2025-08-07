@@ -14,13 +14,23 @@ public class TransferSample {
             .addTask(new Task() {
                 @Override
                 protected void Actions() {
-                    Intake.Block();
                     Outtake.openClaw();
                     Outtake.setExtensionPos(0);
                     Outtake.OverHead_TAKESAMPLE();
                     Intake.RotateToStore();
                     Extendo.state = Extendo.ExtendoStates.RETRACTING;
                     Intake.DropUp();
+                }
+
+                @Override
+                protected boolean Conditions() {
+                    return Intake.SampleReachedTrapDoor();
+                }
+            })
+            .addTask(new Task() {
+                @Override
+                protected void Actions() {
+                    Intake.Block();
                 }
 
                 @Override
@@ -46,7 +56,7 @@ public class TransferSample {
                 @Override
                 protected void Actions() {
                     Intake.StopSpinner();
-                    Outtake.setExtensionPos(0.3);
+                    Outtake.setExtensionPos(0.35);
                 }
 
                 @Override
@@ -54,7 +64,6 @@ public class TransferSample {
                     return Outtake.OverHeadDoneness();
                 }
             })
-            .waitSeconds(0.15)
             .addTask(new Task() {
                 @Override
                 protected void Actions() {

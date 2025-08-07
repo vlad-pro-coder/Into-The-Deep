@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.Pathing;
 
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Chassis.getTargetPosition;
+
 import androidx.annotation.NonNull;
 
-import com.acmerobotics.dashboard.DashboardCore;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Chassis;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 
@@ -69,12 +69,13 @@ public class PurePersuit {
         for(int i=indLine+1;i<Path.size();i++)
             in_front_still_distance+=distance(Path.get(i).pstart,Path.get(i).pend);
         in_front_still_distance+=distance(Path.get(indLine).pend,new Point(Localizer.getCurrentPosition().x,Localizer.getCurrentPosition().y));
+        RobotLog.ii("still distance","" + in_front_still_distance);
         return in_front_still_distance <= errorDistance;
     }
 
     public boolean AngleDone(double errorAngle){
         if(indLine+1 == Path.size())
-            return Chassis.IsHeadingDone(errorAngle);
+            return Localizer.getAngleDifference(getTargetPosition().h,Localizer.getCurrentPosition().h) <= errorAngle;
         return false;
     }
 
@@ -91,10 +92,6 @@ public class PurePersuit {
 
         Point a = line.pstart;
         Point b = line.pend;
-
-        RobotLog.ii("a: ", a.toString());
-        RobotLog.ii("b: ", b.toString());
-        RobotLog.ii("cerc: ", cerc.toString());
 
         double eDistAtoB = Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
 
@@ -125,7 +122,6 @@ public class PurePersuit {
             Point f = new Point(0, 0);
             f.x = ((t - dt) * d.x) + a.x;
             f.y = ((t - dt) * d.y) + a.y;
-            RobotLog.ii("back point",f.toString());
             // check if f lies on the line
             if (is_on(a, b, f))
                 result.add(f);
@@ -135,7 +131,6 @@ public class PurePersuit {
             g.x = ((t + dt) * d.x) + a.x;
             g.y = ((t + dt) * d.y) + a.y;
             // check if g lies on the line
-            RobotLog.ii("front point",g.toString());
             if (is_on(a, b, g))
                 result.add(g);
         }
@@ -152,14 +147,19 @@ public class PurePersuit {
         }
     }
 
-    private double GenerateBestHeading(Point robotPos, Point targetPos) {
-        double dx = targetPos.x - robotPos.x;
-        double dy = targetPos.y - robotPos.y;
-        double angle = Math.atan2(dy, dx); // returns [-π, π]
-        if (angle < 0) {
-            angle += 2 * Math.PI;
+    private double GenerateBestHeading(Point robotPos, Line currentLine) {
+        Point normRobot = new Point(-robotPos.x, -robotPos.y);
+        Point normendLine = new Point(-currentLine.pend.x, -currentLine.pend.y);
+        double dxend = normendLine.x - normRobot.x;
+        double dyend = normendLine.y - normRobot.y;
+        double angleend = Math.atan2(dyend, dxend);// returns [-π, π]
+        if (angleend < 0) {
+            angleend += 2 * Math.PI;
         }
-        return angle; // returns [0, 2π)
+        double oppositeangle = Localizer.normalizeRadians(Localizer.getCurrentPosition().h + Math.PI);
+        if(Localizer.getAngleDifference(Localizer.getCurrentPosition().h,angleend) > Localizer.getAngleDifference(oppositeangle,angleend))
+            return Localizer.normalizeRadians(angleend + Math.PI);
+        return angleend;
     }
 
     private Point GenerateBestPoint(List<Point> IntersectionsWithTheNextLine, Line line, SparkFunOTOS.Pose2D RobotPos) {
@@ -178,8 +178,6 @@ public class PurePersuit {
     }
 
     public SparkFunOTOS.Pose2D FromLinesGeneratePointToFollow() {
-        RobotInitializers.Dashtelemetry.addData("what line is at",indLine);
-
         SparkFunOTOS.Pose2D pos = Localizer.getCurrentPosition();
 
         Line FutureLine = new Line(new Point(0, 0), new Point(0, 0));
@@ -191,8 +189,7 @@ public class PurePersuit {
         if (!IntersectionsWithTheNextLine.isEmpty()) {
             indLine++;
             Point BestPoint = GenerateBestPoint(IntersectionsWithTheNextLine, FutureLine,pos);
-            RobotLog.ii("future","calculated");
-            return new SparkFunOTOS.Pose2D(BestPoint.x, BestPoint.y, GenerateBestHeading(new Point(pos.x, pos.y), BestPoint));
+            return new SparkFunOTOS.Pose2D(BestPoint.x, BestPoint.y, GenerateBestHeading(new Point(pos.x, pos.y), Path.get(indLine)));
         }
 
         Line CurrentLine = Path.get(indLine);
@@ -200,16 +197,15 @@ public class PurePersuit {
         if (!IntersectionsWithTheCurrentLine.isEmpty()) {
             Point BestPoint = GenerateBestPoint(IntersectionsWithTheCurrentLine, CurrentLine,pos);
             if (indLine + 1 < Path.size())
-                return new SparkFunOTOS.Pose2D(BestPoint.x, BestPoint.y, GenerateBestHeading(new Point(pos.x, pos.y), BestPoint));
+                return new SparkFunOTOS.Pose2D(BestPoint.x, BestPoint.y, GenerateBestHeading(new Point(pos.x, pos.y), CurrentLine));
             return new SparkFunOTOS.Pose2D(BestPoint.x, BestPoint.y, LastLineHeading);
         }
         //am belit pula cineva s-a ciocnit in noi si suntem prea departe de path incearca sa merge la ultima pozitie
         Point BestPoint = new Point(CurrentLine.pend.x, CurrentLine.pend.y);
         if (indLine + 1 < Path.size())
-            return new SparkFunOTOS.Pose2D(BestPoint.x, BestPoint.y, GenerateBestHeading(new Point(pos.x, pos.y), BestPoint));
+            return new SparkFunOTOS.Pose2D(BestPoint.x, BestPoint.y, GenerateBestHeading(new Point(pos.x, pos.y), CurrentLine));
         return new SparkFunOTOS.Pose2D(BestPoint.x, BestPoint.y, LastLineHeading);
     }
-
     public void ChangeRadius(double radius){
         this.ChosenRadius = radius;
     }

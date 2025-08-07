@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOps.Tests;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.GetSamplePosition;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 
@@ -19,6 +20,9 @@ public class TestLocalization extends LinearOpMode {
             RobotInitializers.Dashtelemetry.addData("x", Localizer.getCurrentPosition().x);
             RobotInitializers.Dashtelemetry.addData("y", Localizer.getCurrentPosition().y);
             RobotInitializers.Dashtelemetry.addData("h", Localizer.getCurrentPosition().h);
+
+            RobotInitializers.Dashtelemetry.addData("camera x", GetSamplePosition.CameraRelativeToField(Localizer.getCurrentPosition()).x);
+            RobotInitializers.Dashtelemetry.addData("camera y", GetSamplePosition.CameraRelativeToField(Localizer.getCurrentPosition()).y);
 
             Localizer.Update();
             RobotInitializers.Dashtelemetry.update();

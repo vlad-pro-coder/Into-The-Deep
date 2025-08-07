@@ -41,12 +41,8 @@ public class Extendo {
     }
 
     public static void update(){
-        Dashtelemetry.addData("Extendo state",state);
         switch (state) {
             case FREEWILL:
-                Dashtelemetry.addData("joystick power",-gm1.right_stick_y);
-                Dashtelemetry.addData("extendo pos",getPosition());
-                Dashtelemetry.addData("motor power consumption",motor.getCurrent(CurrentUnit.AMPS));
                 if(-gm1.right_stick_y >= 0.05 && getPosition() <= MaxExtension-30){
                 motor.setPower(-Math.signum(gm1.right_stick_y) * (gm1.right_stick_y * gm1.right_stick_y));
                     lastRegisteredPos = getPosition();
@@ -70,7 +66,7 @@ public class Extendo {
                     lm.getState();
                 }catch (Exception e){
                     isLMactive = false;
-                    Dashtelemetry.addLine("lm not operational");
+                    Dashtelemetry.addData("extendo limit switch not operational","");
                 }
                 if((isLMactive && lm.getState()) || (motor.getCurrent(CurrentUnit.AMPS) >= 4 && Math.abs(encoder.getVelocity()) <= 5))
                 {

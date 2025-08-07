@@ -37,6 +37,7 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.CachedMotor;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.RGBsensor;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.IMUBNO085;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.LimitSwitch;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.RangeSensor;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.ServoPlus;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Chassis;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
@@ -188,6 +189,7 @@ public class RobotInitializers {
 
     public static void InitializeIntake(HardwareMap hm){
         Intake.colorsensor = hm.get(RGBsensor.class, "Storage");
+        Intake.rangesensor = hm.get(RangeSensor.class, "Range");
         Intake.dropdownServo = new ServoPlus(ControlHubServos, 1, Servo.Direction.FORWARD);
         Intake.spinner = new CachedMotor(ControlHubMotors, 3, DcMotorSimple.Direction.REVERSE);
         Intake.blocker = new ServoPlus(ControlHubServos, 2, Servo.Direction.FORWARD); // TODO: portul bun

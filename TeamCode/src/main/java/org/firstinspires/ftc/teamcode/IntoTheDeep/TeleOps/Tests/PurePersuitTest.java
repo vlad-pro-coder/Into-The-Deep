@@ -25,7 +25,8 @@ public class PurePersuitTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         RobotInitializers.InitializeFull(hardwareMap);
-
+        RobotInitializers.clearCache();
+        Localizer.Update();
 
         ArrayList<PurePersuit.Point> points = new ArrayList<>(Arrays.asList(
                 new PurePersuit.Point(Localizer.getCurrentPosition().x,Localizer.getCurrentPosition().y),
@@ -34,18 +35,22 @@ public class PurePersuitTest extends LinearOpMode {
                 new PurePersuit.Point(-2168, -2862),
                 new PurePersuit.Point(-977, -3000)
         ));
-        PurePersuit trajectory = new PurePersuit(points,Math.toRadians(targetHeading),radius);
+        Chassis.PurePersuitTrajectory = new PurePersuit(points,targetHeading,radius);
+        Chassis.usedTrajectory = Chassis.trajectoryStates.FOLLOWINGPUREPERSUIT;
         while (opModeInInit()){
-
+            Localizer.Update();
+            RobotInitializers.clearCache();
+            RobotInitializers.Dashtelemetry.addData("x",Localizer.getCurrentPosition().x);
+            RobotInitializers.Dashtelemetry.addData("y",Localizer.getCurrentPosition().y);
+            RobotInitializers.Dashtelemetry.addData("h",Localizer.getCurrentPosition().h);
         }
 
         waitForStart();
 
         while(opModeIsActive()){
             RobotInitializers.clearCache();
-            SparkFunOTOS.Pose2D pos = trajectory.FromLinesGeneratePointToFollow();
-            RobotLog.ii("want to go pos", " x: " + pos.x + " y: " + pos.y + " h: " + pos.h);
-            Chassis.setTargetPosition(pos);
+            RobotInitializers.Dashtelemetry.addData("is traj dist done",Chassis.IsPositionDone(30));
+            RobotInitializers.Dashtelemetry.addData("is heading traj done",Chassis.IsHeadingDone(5));
             Chassis.update();
             Localizer.Update();
         }
