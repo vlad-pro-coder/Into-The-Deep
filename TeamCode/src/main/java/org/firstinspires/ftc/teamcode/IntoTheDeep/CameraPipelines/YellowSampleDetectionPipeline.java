@@ -22,7 +22,7 @@ import java.util.PriorityQueue;
 
 @Config
 public class YellowSampleDetectionPipeline extends OpenCvPipeline {
-    private SparkFunOTOS.Pose2D poseWhenSnapshoted;
+    private static SparkFunOTOS.Pose2D poseWhenSnapshoted;
     public static boolean showMask = false;
     public static Size morphologicalKernel = new Size(3, 3),
             erodeKernel = new Size(3, 3),
@@ -208,7 +208,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
     public synchronized int getNODetections(){
         return centroids.rows();
     }
-    public synchronized SparkFunOTOS.Pose2D getPoseAtDetectionTime(){
+    public static synchronized SparkFunOTOS.Pose2D getPoseAtDetectionTime(){
         return poseWhenSnapshoted;
     }
 }
