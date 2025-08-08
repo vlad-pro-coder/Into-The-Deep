@@ -79,6 +79,9 @@ public class Intake {
     public static boolean SampleReachedTrapDoor(){
         return rangesensor.getDist() <= 5.5;//in cm
     }
+    public static boolean isStorageEmpty(){
+        return getStorageStatus() == SampleType.NONE;
+    }
 
     public static boolean HasExactTeamPiece(){
         if(team == TEAM.RED && getStorageStatus() == SampleType.RED)

@@ -1,14 +1,14 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.CameraPipelines;
 
+import com.acmerobotics.dashboard.DashboardCore;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 
+import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.GetSamplePosition;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfDouble;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -16,20 +16,17 @@ import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
 
 @Config
 public class YellowSampleDetectionPipeline extends OpenCvPipeline {
-    public enum TARGET{
-        CENTER,
-        LOW_CENTER
-    }
-    public static TARGET returnType = TARGET.LOW_CENTER;
     private SparkFunOTOS.Pose2D poseWhenSnapshoted;
     public static boolean showMask = false;
     public static Size morphologicalKernel = new Size(3, 3),
-                    erodeKernel = new Size(3, 3),
-                    dilateKernel = new Size(3, 3);
+            erodeKernel = new Size(3, 3),
+            dilateKernel = new Size(3, 3);
     public static int erodeSteps = 1, dilateSteps = 2, morphologySteps = 2;
 
     // daca nu cuprinde toate sampleurile din cauza luminii mai scade putin din rosu
@@ -38,47 +35,41 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
 
     // daca nu recunoaste pachuri de sample uri posibil ca sunt prea mici, mareste treshold ul
     // sau fa-l mai mic daca ia in calcul noise ul din background
-    public static double SizeTreshold = 50, maxBlur = 10;
+    public static double SizeTreshold = 50;
     private Mat mask = new Mat(), tmp = new Mat(),
             labels = new Mat(), stats = new Mat(), centroids = new Mat();
+
+    private static Point getMiddleTargetPoint(Mat stat, int i){
+        double xM = (stat.get(i, Imgproc.CC_STAT_LEFT)[0] + stat.get(i, Imgproc.CC_STAT_WIDTH)[0]) / 2.d;
+        double yM = (stat.get(i, Imgproc.CC_STAT_TOP)[0] + stat.get(i, Imgproc.CC_STAT_HEIGHT)[0]) / 2.d;
+
+        return new Point(xM, yM);
+    }
+
+    private static Point getLowerTargetPoint(Mat stat, int i){
+        double xM = (stat.get(i, Imgproc.CC_STAT_LEFT)[0] + stat.get(i, Imgproc.CC_STAT_WIDTH)[0]) / 2.d;
+        double y = (stat.get(i, Imgproc.CC_STAT_TOP)[0] + stat.get(i, Imgproc.CC_STAT_HEIGHT)[0]);
+
+        return new Point(xM, y);
+    }
     private List<Double> tx, ty;
     private int biggestDetectionID = 0;
 
     @Override
     public Mat processFrame(Mat input) {
-        //test for blureness
-        Mat gray = new Mat(), laplacian = new Mat(), cpy;
-        cpy = input.clone();
-        Imgproc.cvtColor(cpy, gray, Imgproc.COLOR_RGB2GRAY);
-        Imgproc.Laplacian(gray, laplacian, CvType.CV_64F);
-        MatOfDouble mean = new MatOfDouble(), standardDeviation = new MatOfDouble();
-
-        Core.meanStdDev(laplacian, mean, standardDeviation);
-        double variance = standardDeviation.get(0, 0)[0] * standardDeviation.get(0, 0)[0]; // blurrness
-
-        gray.release();
-        mean.release();
-        standardDeviation.release();
-        laplacian.release();
-
-        if(variance > maxBlur){
-            return input;
-        }
-
         if(tx == null){
-            tx = new ArrayList<>(2);
-            ty = new ArrayList<>(2);
+            tx = new ArrayList<>();
+            ty = new ArrayList<>();
         }
+        poseWhenSnapshoted = Localizer.getCurrentPosition();
 
         double largestContour = -1;
 
         // Daca tot nu merge schimva fov urile sa fie cele bune (cauta pe net)
         //double cameraFOV_Y = Math.sqrt(2 * input.rows() * (1 - Math.cos(cameraFOV)) / (input.rows() * input.rows() + input.cols() * input.cols()));
         //double cameraFOV_X = Math.sqrt(2 * input.cols() * (1 - Math.cos(cameraFOV)) / (input.rows() * input.rows() + input.cols() * input.cols()));
-        double cameraFOV_Y = 0.81;
-        double cameraFOV_X = 1.08;
-        RobotInitializers.Dashtelemetry.addData("FOVY",cameraFOV_Y);
-        RobotInitializers.Dashtelemetry.addData("FOVX",cameraFOV_X);
+        double cameraFOV_Y = Math.toRadians(51.8);
+        double cameraFOV_X = Math.toRadians(66);
 
 
         Imgproc.cvtColor(input, mask, Imgproc.COLOR_RGB2HSV);
@@ -93,7 +84,6 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
 
 
         int noSamples = Imgproc.connectedComponentsWithStats(mask, labels, stats, centroids, 8);
-        int maxId = 0;
 
         // make virtual plane at distance 1 from focal point and compute its with and height
         double vpw = 2.d * Math.tan(cameraFOV_X / 2.d);
@@ -115,28 +105,10 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
             if(stats.get(i, Imgproc.CC_STAT_AREA)[0] < SizeTreshold) continue;
             if(stats.get(i, Imgproc.CC_STAT_AREA)[0] > largestContour) {
                 largestContour = stats.get(i, Imgproc.CC_STAT_AREA)[0];
-                maxId = i;
+                biggestDetectionID = i;
             }
 
-            double x = stats.get(i, Imgproc.CC_STAT_LEFT)[0],
-                    y = stats.get(i, Imgproc.CC_STAT_TOP)[0],
-                    w = stats.get(i, Imgproc.CC_STAT_WIDTH)[0],
-                    h = stats.get(i, Imgproc.CC_STAT_HEIGHT)[0];
-
-            Point target;
-            Point targetMiddleLow = new Point(x + w/2.d, y+h);
-            Point targetMiddle = new Point(x + w/2.d, y + h/2.d);
-
-            switch (returnType){
-                case CENTER:
-                    target = targetMiddle;
-                    break;
-                case LOW_CENTER:
-                    target = targetMiddleLow;
-                    break;
-                default:
-                    target = targetMiddle;
-            }
+            Point target = new Point(centroids.get(i, 0)[0], centroids.get(i, 1)[0]);
 
             // convert from top-left (0, 0) to middle of the image (0, 0)
             double nx = (target.x - input.cols() / 2.d - 0.5d) * 2.d / input.cols(),
@@ -147,8 +119,8 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
             target = new Point(vpw / 2.d * nx, vph / 2.d * ny);
 
             // get the angle
-            ttx.add(i, Math.atan2(target.x, 1));
-            tty.add(i, Math.atan2(target.y, 1));
+            ttx.add(Math.atan2(target.x, 1));
+            tty.add(Math.atan2(target.y, 1));
 
         }
         for(int i = 1; i < noSamples; i++) {
@@ -169,27 +141,64 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
             //bounding box
             Imgproc.rectangle(input, new Point(x, y), new Point(x + w, y + h), rectColor, 2);
         }
-        poseWhenSnapshoted = Localizer.getCurrentPosition();
         tx = ttx;
         ty = tty;
-        biggestDetectionID = maxId;
         mask.release();
         tmp.release();
 
         return input;
     }
 
-    public synchronized double getTx(int id){
-        return tx.get(id);
+    public static class SamplePoint {
+        public double x;
+        public double y;
+
+        SamplePoint(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        // For displaying the point
+        public String toString() {
+            return "(" + x + ", " + y + ")";
+        }
     }
-    public synchronized double getTy(int id){
-        return ty.get(id);
+
+    Comparator<SamplePoint> pointComparator = (p1, p2) -> {
+        int yComparison = Double.compare(p2.y, p1.y); // higher y first
+        if (yComparison != 0) {
+            return yComparison;
+        }
+        return Double.compare(p1.x, p2.x); // lower x first
+    };
+    public static final double XLimit = 1250,YLimit = 1670;
+
+    public synchronized PriorityQueue<SamplePoint> getSamplesPrioritized(){
+        PriorityQueue<SamplePoint> orderedSamples = new PriorityQueue<SamplePoint>(pointComparator);
+        for(int i=1;i<tx.size();i++)
+        {
+            RobotInitializers.Dashtelemetry.addLine("(" + tx.get(i) + ")");
+            RobotInitializers.Dashtelemetry.addLine("(" + ty.get(i) + ")");
+            SparkFunOTOS.Pose2D globalSample = GetSamplePosition.GetGlobalSamplePosition(Math.toDegrees(tx.get(i)), Math.toDegrees(ty.get(i)));
+            RobotInitializers.Dashtelemetry.addLine(new SamplePoint(globalSample.x,globalSample.y).toString());
+            if(globalSample.x > XLimit || globalSample.y > YLimit)
+                continue;
+            orderedSamples.add(new SamplePoint(globalSample.x,globalSample.y));
+        }
+        return orderedSamples;
+    }
+
+    public synchronized List<Double> getTx(){
+        return tx;
+    }
+    public synchronized List<Double> getTy(){
+        return ty;
     }
     public synchronized int getLargetDetectionId(){
         return biggestDetectionID;
     }
     public synchronized int getNODetections(){
-        return tx.size() - 1;
+        return centroids.rows();
     }
     public synchronized SparkFunOTOS.Pose2D getPoseAtDetectionTime(){
         return poseWhenSnapshoted;

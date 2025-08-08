@@ -18,7 +18,7 @@ public class GetSamplePosition {
     public static double ExtendoToDistance(int e){
         return (2*Math.PI*spool/RA) * ((double)e/CPR);
     }
-    public static double initialAngle = Math.toRadians(25), h = 261.817, centerToExtendo = 140;// COY = 140
+    public static double initialAngle = Math.toRadians(25), h = 261.817, centerToExtendo = 160;// COY = 140
     public static double cameraOffsetX = 142.621, cameraOffsetY = 107.053;
     public static double centerOffsetToDownRightX = 135.64,centerOffsetToDownRightY = 158.502;
     public static double CameraAngleFromCenterPoint = Math.atan(cameraOffsetY/cameraOffsetX);//de schimbat
@@ -174,7 +174,7 @@ public class GetSamplePosition {
 
         double delta_x = SampleFieldPos.x - normalizedPos.x;
         double delta_y = SampleFieldPos.y - normalizedPos.y;
-        double angle = Math.atan2(delta_y,delta_x) - Math.PI/2.f;
+        double angle = Math.atan2(delta_y,delta_x);
         angle = Localizer.normalizeRadians(angle);
 
         double e = Localizer.getDistanceFromTwoPoints(SampleFieldPos, normalizedPos) - centerToExtendo;

@@ -3,11 +3,13 @@ package org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 
+import org.firstinspires.ftc.teamcode.IntoTheDeep.CameraPipelines.YellowSampleDetectionPipeline;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Pathing.PurePersuit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.PriorityQueue;
 
 @Config
 public class AutoConstants {
@@ -54,5 +56,6 @@ public class AutoConstants {
 
     public static final double PUREPERSUIT_radius = 600;
 
+    public static PriorityQueue<YellowSampleDetectionPipeline.SamplePoint> orderedSamples = new PriorityQueue<>();
 
 }
