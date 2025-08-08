@@ -61,7 +61,6 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
             tx = new ArrayList<>();
             ty = new ArrayList<>();
         }
-        poseWhenSnapshoted = Localizer.getCurrentPosition();
 
         double largestContour = -1;
 
@@ -108,7 +107,12 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
                 biggestDetectionID = i;
             }
 
-            Point target = new Point(centroids.get(i, 0)[0], centroids.get(i, 1)[0]);
+            double x = stats.get(i, Imgproc.CC_STAT_LEFT)[0],
+                    y = stats.get(i, Imgproc.CC_STAT_TOP)[0],
+                    w = stats.get(i, Imgproc.CC_STAT_WIDTH)[0],
+                    h = stats.get(i, Imgproc.CC_STAT_HEIGHT)[0];
+
+            Point target = new Point(x + w/2.d, y + h/2.d);
 
             // convert from top-left (0, 0) to middle of the image (0, 0)
             double nx = (target.x - input.cols() / 2.d - 0.5d) * 2.d / input.cols(),
@@ -117,6 +121,9 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
 
             // convert from pixel distance to virtual plane coordonates
             target = new Point(vpw / 2.d * nx, vph / 2.d * ny);
+
+
+
 
             // get the angle
             ttx.add(Math.atan2(target.x, 1));
@@ -145,6 +152,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
         ty = tty;
         mask.release();
         tmp.release();
+        poseWhenSnapshoted = Localizer.getCurrentPosition();
 
         return input;
     }
