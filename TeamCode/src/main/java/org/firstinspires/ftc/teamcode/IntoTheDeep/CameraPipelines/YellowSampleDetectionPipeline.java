@@ -6,7 +6,9 @@ import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -18,6 +20,11 @@ import java.util.List;
 
 @Config
 public class YellowSampleDetectionPipeline extends OpenCvPipeline {
+    public enum TARGET{
+        CENTER,
+        LOW_CENTER
+    }
+    public static TARGET returnType = TARGET.LOW_CENTER;
     private SparkFunOTOS.Pose2D poseWhenSnapshoted;
     public static boolean showMask = false;
     public static Size morphologicalKernel = new Size(3, 3),
@@ -31,28 +38,33 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
 
     // daca nu recunoaste pachuri de sample uri posibil ca sunt prea mici, mareste treshold ul
     // sau fa-l mai mic daca ia in calcul noise ul din background
-    public static double SizeTreshold = 50;
+    public static double SizeTreshold = 50, maxBlur = 10;
     private Mat mask = new Mat(), tmp = new Mat(),
             labels = new Mat(), stats = new Mat(), centroids = new Mat();
-
-    private static Point getMiddleTargetPoint(Mat stat, int i){
-        double xM = (stat.get(i, Imgproc.CC_STAT_LEFT)[0] + stat.get(i, Imgproc.CC_STAT_WIDTH)[0]) / 2.d;
-        double yM = (stat.get(i, Imgproc.CC_STAT_TOP)[0] + stat.get(i, Imgproc.CC_STAT_HEIGHT)[0]) / 2.d;
-
-        return new Point(xM, yM);
-    }
-
-    private static Point getLowerTargetPoint(Mat stat, int i){
-        double xM = (stat.get(i, Imgproc.CC_STAT_LEFT)[0] + stat.get(i, Imgproc.CC_STAT_WIDTH)[0]) / 2.d;
-        double y = (stat.get(i, Imgproc.CC_STAT_TOP)[0] + stat.get(i, Imgproc.CC_STAT_HEIGHT)[0]);
-
-        return new Point(xM, y);
-    }
     private List<Double> tx, ty;
     private int biggestDetectionID = 0;
 
     @Override
     public Mat processFrame(Mat input) {
+        //test for blureness
+        Mat gray = new Mat(), laplacian = new Mat(), cpy;
+        cpy = input.clone();
+        Imgproc.cvtColor(cpy, gray, Imgproc.COLOR_RGB2GRAY);
+        Imgproc.Laplacian(gray, laplacian, CvType.CV_64F);
+        MatOfDouble mean = new MatOfDouble(), standardDeviation = new MatOfDouble();
+
+        Core.meanStdDev(laplacian, mean, standardDeviation);
+        double variance = standardDeviation.get(0, 0)[0] * standardDeviation.get(0, 0)[0]; // blurrness
+
+        gray.release();
+        mean.release();
+        standardDeviation.release();
+        laplacian.release();
+
+        if(variance > maxBlur){
+            return input;
+        }
+
         if(tx == null){
             tx = new ArrayList<>(2);
             ty = new ArrayList<>(2);
@@ -64,8 +76,8 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
         // Daca tot nu merge schimva fov urile sa fie cele bune (cauta pe net)
         //double cameraFOV_Y = Math.sqrt(2 * input.rows() * (1 - Math.cos(cameraFOV)) / (input.rows() * input.rows() + input.cols() * input.cols()));
         //double cameraFOV_X = Math.sqrt(2 * input.cols() * (1 - Math.cos(cameraFOV)) / (input.rows() * input.rows() + input.cols() * input.cols()));
-        double cameraFOV_Y = Math.toRadians(51.8);
-        double cameraFOV_X = Math.toRadians(66);
+        double cameraFOV_Y = 0.81;
+        double cameraFOV_X = 1.08;
         RobotInitializers.Dashtelemetry.addData("FOVY",cameraFOV_Y);
         RobotInitializers.Dashtelemetry.addData("FOVX",cameraFOV_X);
 
@@ -82,6 +94,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
 
 
         int noSamples = Imgproc.connectedComponentsWithStats(mask, labels, stats, centroids, 8);
+        int maxId = 0;
 
         // make virtual plane at distance 1 from focal point and compute its with and height
         double vpw = 2.d * Math.tan(cameraFOV_X / 2.d);
@@ -103,10 +116,28 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
             if(stats.get(i, Imgproc.CC_STAT_AREA)[0] < SizeTreshold) continue;
             if(stats.get(i, Imgproc.CC_STAT_AREA)[0] > largestContour) {
                 largestContour = stats.get(i, Imgproc.CC_STAT_AREA)[0];
-                biggestDetectionID = i;
+                maxId = i;
             }
 
-            Point target = new Point(centroids.get(i, 0)[0], centroids.get(i, 1)[0]);
+            double x = stats.get(i, Imgproc.CC_STAT_LEFT)[0],
+                    y = stats.get(i, Imgproc.CC_STAT_TOP)[0],
+                    w = stats.get(i, Imgproc.CC_STAT_WIDTH)[0],
+                    h = stats.get(i, Imgproc.CC_STAT_HEIGHT)[0];
+
+            Point target;
+            Point targetMiddleLow = new Point(x + w/2.d, y+h);
+            Point targetMiddle = new Point(x + w/2.d, y + h/2.d);
+
+            switch (returnType){
+                case CENTER:
+                    target = targetMiddle;
+                    break;
+                case LOW_CENTER:
+                    target = targetMiddleLow;
+                    break;
+                default:
+                    target = targetMiddle;
+            }
 
             // convert from top-left (0, 0) to middle of the image (0, 0)
             double nx = (target.x - input.cols() / 2.d - 0.5d) * 2.d / input.cols(),
@@ -141,6 +172,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
         }
         tx = ttx;
         ty = tty;
+        biggestDetectionID = maxId;
         mask.release();
         tmp.release();
 
@@ -157,7 +189,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
         return biggestDetectionID;
     }
     public synchronized int getNODetections(){
-        return centroids.rows();
+        return tx.size() - 1;
     }
     public synchronized SparkFunOTOS.Pose2D getPoseAtDetectionTime(){
         return poseWhenSnapshoted;
