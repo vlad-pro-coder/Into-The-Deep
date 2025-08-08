@@ -69,7 +69,6 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
             tx = new ArrayList<>(2);
             ty = new ArrayList<>(2);
         }
-        poseWhenSnapshoted = Localizer.getCurrentPosition();
 
         double largestContour = -1;
 
@@ -170,6 +169,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
             //bounding box
             Imgproc.rectangle(input, new Point(x, y), new Point(x + w, y + h), rectColor, 2);
         }
+        poseWhenSnapshoted = Localizer.getCurrentPosition();
         tx = ttx;
         ty = tty;
         biggestDetectionID = maxId;
