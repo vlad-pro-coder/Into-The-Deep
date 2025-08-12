@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers;
 
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.CameraPipelines.YellowSampleDetectionPipeline.poseWhenSnapshoted;
+
 import android.graphics.Point;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -37,8 +39,8 @@ public class GetSamplePosition {
     public static double middleX = 630, middleY = -1600;
     public static double XBarSub = 0, halfYTerrain = -1500;
     public static SparkFunOTOS.Pose2D getPositionRelativeToRobot(SparkFunOTOS.Pose2D fieldPos){
-        double d = Localizer.getDistanceFromTwoPoints(fieldPos, YellowSampleDetectionPipeline.getPoseAtDetectionTime());
-        double t = YellowSampleDetectionPipeline.getPoseAtDetectionTime().h - Math.atan2(fieldPos.y, fieldPos.x);
+        double d = Localizer.getDistanceFromTwoPoints(fieldPos, Localizer.getCurrentPosition());
+        double t = Localizer.getCurrentPosition().h - Math.atan2(fieldPos.y, fieldPos.x);
         double x = d * Math.cos(t);
         double y = d * Math.sin(t);
         return new SparkFunOTOS.Pose2D(x, y, 0);
@@ -59,15 +61,22 @@ public class GetSamplePosition {
         return new SparkFunOTOS.Pose2D(e, forward, -h);
     }
     public static SparkFunOTOS.Pose2D getPositionRelativeToRobot(double tx, double ty){
+
+        //double z = Math.hypot(cameraOffsetX,cameraOffsetY);
+        //double XcameraRobot = z * Math.cos((Localizer.normalizeRadians(poseWhenSnapshoted.h) + CameraAngleFromCenterPoint)%(2*Math.PI));
+        //double YcameraRobot = z * Math.sin((Localizer.normalizeRadians(poseWhenSnapshoted.h) + CameraAngleFromCenterPoint)%(2*Math.PI));
+        //double ErrorX = - (Localizer.getCurrentPosition().x - poseWhenSnapshoted.x);
+        //double ErrorY = - (Localizer.getCurrentPosition().y - poseWhenSnapshoted.y);
         double Y = h * Math.tan(Math.PI / 2 - initialAngle + Math.toRadians(ty));
         double X = Math.tan(Math.toRadians(tx)) * Y - cameraOffsetX;
         Y += cameraOffsetY;
-        return new SparkFunOTOS.Pose2D(Y, X, 0);
+        return new SparkFunOTOS.Pose2D(X, Y, 0);
     }
     public static SparkFunOTOS.Pose2D getExtendoRotPair(double tx, double ty){
+        double robotHwhenphototaken = Localizer.normalizeRadians(poseWhenSnapshoted.h);
         SparkFunOTOS.Pose2D pose = getPositionRelativeToRobot(tx, ty);
         double extendoDist = MMToEncoderTicks(Math.sqrt(pose.x * pose.x + pose.y * pose.y) - centerToExtendo);
-        double rot = Math.atan(pose.y / -pose.x);
+        double rot = robotHwhenphototaken + Math.atan(-pose.x / pose.y);
         double fwd = pose.x - Extendo.MaxExtension;
         if(fwd < 0) fwd = 0;
         return new SparkFunOTOS.Pose2D(extendoDist, fwd, rot);
@@ -146,7 +155,7 @@ public class GetSamplePosition {
 
     public static SparkFunOTOS.Pose2D GetExtendoTicksToTravelAndNeededAngle(double tx,double ty) {
 
-        SparkFunOTOS.Pose2D pos = YellowSampleDetectionPipeline.getPoseAtDetectionTime();
+        SparkFunOTOS.Pose2D pos = poseWhenSnapshoted;
         SparkFunOTOS.Pose2D normalizedPos = normalize_pos(pos);
 
         SparkFunOTOS.Pose2D poscamera = CameraRelativeToField(pos);
@@ -170,7 +179,7 @@ public class GetSamplePosition {
 
     public static SparkFunOTOS.Pose2D GetExtendoTicksToTravelAndNeededAngleFromSample(SparkFunOTOS.Pose2D SampleFieldPos){
 
-        SparkFunOTOS.Pose2D pos = YellowSampleDetectionPipeline.getPoseAtDetectionTime();
+        SparkFunOTOS.Pose2D pos = poseWhenSnapshoted;
         SparkFunOTOS.Pose2D normalizedPos = normalize_pos(pos);
 
         double delta_x = SampleFieldPos.x - normalizedPos.x;
@@ -187,7 +196,7 @@ public class GetSamplePosition {
     }
 
     public static SparkFunOTOS.Pose2D getContinuosTrackingData(SparkFunOTOS.Pose2D SampleFieldPos){
-        SparkFunOTOS.Pose2D pos = YellowSampleDetectionPipeline.getPoseAtDetectionTime();
+        SparkFunOTOS.Pose2D pos = Localizer.getCurrentPosition();
         SparkFunOTOS.Pose2D normalizedPos = normalize_pos(pos);
 
         double delta_x = SampleFieldPos.x - normalizedPos.x;
@@ -203,7 +212,7 @@ public class GetSamplePosition {
     }
 
     public static SparkFunOTOS.Pose2D GetGlobalSamplePosition(double tx,double ty){
-        SparkFunOTOS.Pose2D pos = YellowSampleDetectionPipeline.getPoseAtDetectionTime();
+        SparkFunOTOS.Pose2D pos = poseWhenSnapshoted;
         SparkFunOTOS.Pose2D normalizedPos = normalize_pos(pos);
 
         SparkFunOTOS.Pose2D poscamera = CameraRelativeToField(pos);

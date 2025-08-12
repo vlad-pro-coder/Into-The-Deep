@@ -1,5 +1,12 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOps.Tests;
 
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.AutoConstants.HEADING_fromsubmersibletobasket;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.AutoConstants.HEADING_infrontofsubmersible;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.AutoConstants.PUREPERSUIT_pathbacktobasket;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.AutoConstants.PUREPERSUIT_pathtosubmersible;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.AutoConstants.PUREPERSUIT_radius;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer.pinPoint;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -7,6 +14,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Scheduler;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Task;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Pathing.PurePersuit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Chassis;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
@@ -25,21 +34,41 @@ public class PurePersuitTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         RobotInitializers.InitializeFull(hardwareMap);
-        RobotInitializers.clearCache();
-        Localizer.Update();
 
-        ArrayList<PurePersuit.Point> points = new ArrayList<>(Arrays.asList(
-                new PurePersuit.Point(Localizer.getCurrentPosition().x,Localizer.getCurrentPosition().y),
-                new PurePersuit.Point(-325, -505),
-                new PurePersuit.Point(-2158, -522),
-                new PurePersuit.Point(-2168, -2862),
-                new PurePersuit.Point(-977, -3000)
-        ));
-        Chassis.PurePersuitTrajectory = new PurePersuit(points,targetHeading,radius);
-        Chassis.usedTrajectory = Chassis.trajectoryStates.FOLLOWINGPUREPERSUIT;
+        Scheduler follower = new Scheduler();
+        Scheduler tasks = new Scheduler()
+                .waitSeconds(2)
+                .StartPurePersuit(PUREPERSUIT_pathtosubmersible,HEADING_infrontofsubmersible,PUREPERSUIT_radius)
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Chassis.IsPositionDone(30) && Chassis.IsHeadingDone(5);
+                    }
+                })
+                .waitSeconds(2)
+                .StartPurePersuit(PUREPERSUIT_pathbacktobasket,HEADING_fromsubmersibletobasket,PUREPERSUIT_radius)
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Chassis.IsPositionDone(30) && Chassis.IsHeadingDone(5);
+                    }
+                });
+
+
         while (opModeInInit()){
             Localizer.Update();
             RobotInitializers.clearCache();
+            Chassis.setTargetPosition(new SparkFunOTOS.Pose2D(451, -206,HEADING_fromsubmersibletobasket));
             RobotInitializers.Dashtelemetry.addData("x",Localizer.getCurrentPosition().x);
             RobotInitializers.Dashtelemetry.addData("y",Localizer.getCurrentPosition().y);
             RobotInitializers.Dashtelemetry.addData("h",Localizer.getCurrentPosition().h);
@@ -49,10 +78,15 @@ public class PurePersuitTest extends LinearOpMode {
 
         while(opModeIsActive()){
             RobotInitializers.clearCache();
-            RobotInitializers.Dashtelemetry.addData("is traj dist done",Chassis.IsPositionDone(30));
-            RobotInitializers.Dashtelemetry.addData("is heading traj done",Chassis.IsHeadingDone(5));
+
+            if(follower.IsSchedulerDone())
+                follower.AddAnotherScheduler(tasks);
+            follower.update();
+
             Chassis.update();
             Localizer.Update();
+            RobotInitializers.Dashtelemetry.addData("",pinPoint.getFrequency());
+            RobotInitializers.Dashtelemetry.update();
         }
     }
 }

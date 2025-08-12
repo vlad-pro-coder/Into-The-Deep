@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.ApproachingSubmersibleActions;
 
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.GetSamplePosition.GetExtendoTicksToTravelAndNeededAngleFromSample;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.GetSamplePosition.getExtendoRotPair;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Scheduler;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Task;
@@ -12,30 +14,31 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
 
 public class TakeCachedSample {
-    public static Scheduler TakeCachedSample(YellowSampleDetectionPipeline.SamplePoint Sample, double timeout){
-        SparkFunOTOS.Pose2D data = GetExtendoTicksToTravelAndNeededAngleFromSample(new SparkFunOTOS.Pose2D(Sample.x,Sample.y,0));
+    public static Scheduler TakeCachedSampleActions(YellowSampleDetectionPipeline.SamplePoint Sample, double timeout){
+        SparkFunOTOS.Pose2D data = getExtendoRotPair(Sample.x,Sample.y);
         return new Scheduler()
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
                         Chassis.usedTrajectory = Chassis.trajectoryStates.FREEWILL;
                         Chassis.setHeading(data.h);
+                        RobotLog.ii("taken sample"," x: " + Sample.x + " y: " + Sample.y);
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Chassis.IsHeadingDone(5);
+                        return Chassis.IsHeadingDone(2);
                     }
                 })
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        Extendo.setExtendoPos(data.x-200);
+                        Extendo.setExtendoPos(Math.max(data.x-67,250));
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Extendo.IsExtendoDone(30);
+                        return Extendo.IsExtendoDone(60);
                     }
                 })
                 .addTask(new Task() {
@@ -43,7 +46,18 @@ public class TakeCachedSample {
                     protected void Actions() {
                         Intake.DropDown();
                         Intake.RotateToStore();
-                        Extendo.setExtendoPos(data.x);
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return true;
+                    }
+                })
+                .waitSeconds(0.1)
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Extendo.CustomPowerToMotors(0.5);
                     }
 
                     @Override
@@ -68,7 +82,7 @@ public class TakeCachedSample {
 
                         boolean r = (System.currentTimeMillis() - track) >= wait;
                         if (r) track = -1;
-                        return (Intake.HasMixedTeamPiece() && Intake.SampleReachedTrapDoor()) || r;
+                        return Intake.HasMixedTeamPiece() || r;
                     }
                 });
     }

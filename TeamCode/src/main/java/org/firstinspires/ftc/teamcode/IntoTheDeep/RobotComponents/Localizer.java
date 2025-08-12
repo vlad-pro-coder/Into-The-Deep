@@ -84,6 +84,7 @@ public class Localizer {
         RobotInitializers.Dashtelemetry.addData("pose", "(" + getCurrentPosition().x + ", " + getCurrentPosition().y + ", " + Math.toDegrees(getCurrentPosition().h) + "deg)");
 //        RobotLog.dd("pose", "(" + getCurrentPosition().x + ", " + getCurrentPosition().y + ", " + Math.toDegrees(getCurrentPosition().h) + "deg)");
         time.reset();
+
     }
     public static void Reset(){
         pinPoint.recalibrateIMU();

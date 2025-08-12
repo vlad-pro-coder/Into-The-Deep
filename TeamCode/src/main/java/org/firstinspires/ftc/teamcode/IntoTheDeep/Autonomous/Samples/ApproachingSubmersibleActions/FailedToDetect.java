@@ -9,19 +9,22 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
 
 public class FailedToDetect {
-    public static Scheduler FailedToDetectActions = new Scheduler()
-            .addTask(new Task() {
-                @Override
-                protected void Actions() {
-                    Intake.DropUp();
-                    Intake.RotateToEject();
-                    Extendo.state = Extendo.ExtendoStates.RETRACTING;
-                    Chassis.setHeading(HEADING_infrontofsubmersible);
-                }
+    public static Scheduler FailedToDetectActions() {
+        return new Scheduler()
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Intake.DropUp();
+                        Intake.RotateToEject();
+                        Extendo.state = Extendo.ExtendoStates.RETRACTING;
+                        Intake.Unblock();
+                        Chassis.setHeading(HEADING_infrontofsubmersible);
+                    }
 
-                @Override
-                protected boolean Conditions() {
-                    return Extendo.getPosition() < 30 && Chassis.IsHeadingDone(5);
-                }
-            });
+                    @Override
+                    protected boolean Conditions() {
+                        return Extendo.getPosition() < 30 && Chassis.IsHeadingDone(5);
+                    }
+                });
+    }
 }

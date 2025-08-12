@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents;
 
-import static org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.Colors.ColorType.BLUE;
-import static org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.Colors.ColorType.RED;
-import static org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.Colors.ColorType.YELLOW;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleopsStarter.team;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -64,7 +61,7 @@ public class Intake {
     }
 
     public static SampleType getStorageStatus(){
-        if(colorsensor.getDistance(DistanceUnit.CM) >= 3.6) return SampleType.NONE;
+        if(colorsensor.getDistance(DistanceUnit.CM) >= 4.3) return SampleType.NONE;
         switch (colorsensor.getColorSeenBySensor()){
             case RED:
                 return SampleType.RED;
@@ -77,7 +74,7 @@ public class Intake {
         }
     }
     public static boolean SampleReachedTrapDoor(){
-        return rangesensor.getDist() <= 5.5;//in cm
+        return rangesensor.getDist() <= 9;//in cm
     }
     public static boolean isStorageEmpty(){
         return getStorageStatus() == SampleType.NONE;

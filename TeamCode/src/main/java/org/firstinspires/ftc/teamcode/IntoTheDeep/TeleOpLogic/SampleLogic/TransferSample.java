@@ -10,78 +10,83 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake;
 
 public class TransferSample {
 
-    public static Scheduler TransferSampleActions = new Scheduler()
-            .addTask(new Task() {
-                @Override
-                protected void Actions() {
-                    Outtake.openClaw();
-                    Outtake.setExtensionPos(0);
-                    Outtake.OverHead_TAKESAMPLE();
-                    Intake.RotateToStore();
-                    Extendo.state = Extendo.ExtendoStates.RETRACTING;
-                    Intake.DropUp();
-                }
+    public static Scheduler TransferSampleActions(){
+        return new Scheduler()
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Outtake.openClaw();
+                        Outtake.setExtensionPos(0);
+                        Outtake.OverHead_TAKESAMPLE();
+                        Intake.RotateToStore();
+                        Extendo.state = Extendo.ExtendoStates.RETRACTING;
+                        Intake.DropUp();
+                    }
 
-                @Override
-                protected boolean Conditions() {
-                    return Intake.SampleReachedTrapDoor();
-                }
-            })
-            .addTask(new Task() {
-                @Override
-                protected void Actions() {
-                    Intake.Block();
-                }
+                    @Override
+                    protected boolean Conditions() {
+                        return Intake.SampleReachedTrapDoor();
+                    }
+                })
+                .waitSeconds(0.15)
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Intake.Block();
+                    }
 
-                @Override
-                protected boolean Conditions() {
-                    return true;
-                }
-            })
-            .waitSeconds(0.3)
-            .addTask(new Task() {
-                @Override
-                protected void Actions() {
-                    Intake.RotateToEject();
-                    Lift.CustomPowerToMotors(-0.5);
-                }
+                    @Override
+                    protected boolean Conditions() {
+                        return true;
+                    }
+                })
+                .waitSeconds(0.1)
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Intake.RotateToEject();
+                        Lift.CustomPowerToMotors(-0.5);
+                    }
 
-                @Override
-                protected boolean Conditions() {
-                    return Extendo.getPosition() < 20 && Lift.getPosition() < 20;
-                }
-            })
-            .waitSeconds(0.15)
-            .addTask(new Task() {
-                @Override
-                protected void Actions() {
-                    Intake.StopSpinner();
-                    Outtake.setExtensionPos(0.35);
-                }
+                    @Override
+                    protected boolean Conditions() {
+                        return Extendo.getPosition() < 30 && Lift.getPosition() < 30;
+                    }
+                })
+                .waitSeconds(0.15)
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Intake.StopSpinner();
+                        Outtake.setExtensionPos(0.3);
+                    }
 
-                @Override
-                protected boolean Conditions() {
-                    return Outtake.OverHeadDoneness();
-                }
-            })
-            .addTask(new Task() {
-                @Override
-                protected void Actions() {
-                    Outtake.closeClaw();
-                }
-                @Override
-                protected boolean Conditions() {
-                    return Outtake.IsClawDone();
-                }
-            })
-            .addTask(new Task() {
-                @Override
-                protected void Actions() {
-                    Lift.state = Lift.LIFTSTATES.OFF;
-                }
-                @Override
-                protected boolean Conditions() {
-                    return true;
-                }
-            });
+                    @Override
+                    protected boolean Conditions() {
+                        return Outtake.OverHeadDoneness();
+                    }
+                })
+                .waitSeconds(0.1)
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Outtake.closeClawTight();
+                    }
+                    @Override
+                    protected boolean Conditions() {
+                        return Outtake.IsClawDone();
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Lift.state = Lift.LIFTSTATES.OFF;
+                        Intake.Unblock();
+                    }
+                    @Override
+                    protected boolean Conditions() {
+                        return true;
+                    }
+                });
+    }
 }

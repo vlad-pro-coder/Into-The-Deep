@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOps.Tests;
 
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.AutoConstants.orderedSamples;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.GetSamplePosition.GetExtendoTicksToTravelAndNeededAngleFromSample;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.GetSamplePosition.getExtendoRotPair;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
@@ -38,10 +39,11 @@ public class CameraTest extends LinearOpMode {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        YellowSampleDetectionPipeline.SamplePoint bestsample = camera.yellow.getSamplesPrioritized().poll();
-                        SparkFunOTOS.Pose2D data = GetExtendoTicksToTravelAndNeededAngleFromSample(new SparkFunOTOS.Pose2D(bestsample.x,bestsample.y,0));
+                        YellowSampleDetectionPipeline.SamplePoint bestsample = camera.yellow.getBestTxTy();
+                        //SparkFunOTOS.Pose2D data = GetExtendoTicksToTravelAndNeededAngleFromSample(new SparkFunOTOS.Pose2D(bestsample.x,bestsample.y,0));
+                        SparkFunOTOS.Pose2D data = getExtendoRotPair(bestsample.x, bestsample.y);
                         Extendo.state = Extendo.ExtendoStates.GOTOPOS;
-                        Chassis.setTargetPosition(new SparkFunOTOS.Pose2D(Localizer.getCurrentPosition().x,Localizer.getCurrentPosition().y,data.h));
+                        Chassis.setHeading(data.h);
                         Extendo.setExtendoPos(data.x);
                     }
 
@@ -55,9 +57,14 @@ public class CameraTest extends LinearOpMode {
 
         camera  = new Logitech920("logitik",hardwareMap);
         camera.startCamera();
+        Chassis.usedTrajectory = Chassis.trajectoryStates.FREEWILL;
+
+        Chassis.setTargetPosition(new SparkFunOTOS.Pose2D(0,0,0));
 
         while(opModeInInit()){
-
+            RobotInitializers.clearCache();
+            Localizer.Update();
+            RobotInitializers.Dashtelemetry.update();
         }
         waitForStart();
         while(opModeIsActive()){
@@ -82,14 +89,21 @@ public class CameraTest extends LinearOpMode {
 
                 RobotInitializers.Dashtelemetry.addData("camera x", GetSamplePosition.CameraRelativeToField(Localizer.getCurrentPosition()).x);
                 RobotInitializers.Dashtelemetry.addData("camera y", GetSamplePosition.CameraRelativeToField(Localizer.getCurrentPosition()).y);
+                YellowSampleDetectionPipeline.SamplePoint bestsample = camera.yellow.getBestTxTy();
+                SparkFunOTOS.Pose2D cosmin = GetSamplePosition.getPositionRelativeToRobot(bestsample.x, bestsample.y);
+                    RobotInitializers.Dashtelemetry.addData("x cu robotul",cosmin.x);
+                RobotInitializers.Dashtelemetry.addData("y cu robotul", cosmin.y);
+
             }
 
             RobotInitializers.Dashtelemetry.addData("extendo ticks",Extendo.getPosition());
             RobotInitializers.Dashtelemetry.addData("extendo target",Extendo.pidController.getTargetPosition());
+            //RobotInitializers.Dashtelemetry.addData("extendo in field","x: " + camera.yellow.calculateWhereExtendoEndUp((int)Extendo.getPosition()).x + "y: " + camera.yellow.calculateWhereExtendoEndUp((int)Extendo.getPosition()).y);
             RobotInitializers.Dashtelemetry.update();
             if(gofaceSample)
                 tasks.update();
 
+            Chassis.update();
             Localizer.Update();
         }
     }

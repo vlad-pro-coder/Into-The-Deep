@@ -33,7 +33,7 @@ public class Scheduler {
             }
             @Override
             protected boolean Conditions() {
-                return Localizer.getVelocity().x < 10 && Localizer.getVelocity().y < 10 && Localizer.getVelocity().h < Math.toRadians(5);
+                return Localizer.getVelocity().x < 10 && Localizer.getVelocity().y < 10 && Localizer.getVelocity().h < Math.toRadians(3);
             }
         });
         return this;

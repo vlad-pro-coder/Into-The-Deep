@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents;
 
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake.OverHeadTakeSampPos;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMUImpl;
@@ -227,6 +229,7 @@ public class RobotInitializers {
     public static void InitializeForOperation(){
         Lift.state = Lift.LIFTSTATES.RETRACTING;
         Extendo.state = Extendo.ExtendoStates.RETRACTING;
+        Outtake.armProfile.setInstant(OverHeadTakeSampPos);
         Outtake.OverHead_TAKESAMPLE();
         Outtake.setExtensionPos(0);
         Outtake.openClaw();

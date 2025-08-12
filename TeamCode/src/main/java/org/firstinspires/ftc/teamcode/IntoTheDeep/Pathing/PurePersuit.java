@@ -69,7 +69,6 @@ public class PurePersuit {
         for(int i=indLine+1;i<Path.size();i++)
             in_front_still_distance+=distance(Path.get(i).pstart,Path.get(i).pend);
         in_front_still_distance+=distance(Path.get(indLine).pend,new Point(Localizer.getCurrentPosition().x,Localizer.getCurrentPosition().y));
-        RobotLog.ii("still distance","" + in_front_still_distance);
         return in_front_still_distance <= errorDistance;
     }
 

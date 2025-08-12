@@ -1,10 +1,15 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.CameraPipelines;
 
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.GetSamplePosition.ExtendoToDistance;
+
 import com.acmerobotics.dashboard.DashboardCore;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+import com.qualcomm.robotcore.robot.Robot;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.GetSamplePosition;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 import org.opencv.core.Core;
@@ -20,17 +25,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import kotlin.Pair;
+
 @Config
 public class YellowSampleDetectionPipeline extends OpenCvPipeline {
-    private static SparkFunOTOS.Pose2D poseWhenSnapshoted;
+    public static SparkFunOTOS.Pose2D poseWhenSnapshoted = new SparkFunOTOS.Pose2D(0,0,0);
     public static boolean showMask = false;
     public static Size morphologicalKernel = new Size(3, 3),
             erodeKernel = new Size(3, 3),
             dilateKernel = new Size(3, 3);
-    public static int erodeSteps = 1, dilateSteps = 2, morphologySteps = 2;
+    public static int erodeSteps = 1, dilateSteps = 4, morphologySteps = 1;
 
     // daca nu cuprinde toate sampleurile din cauza luminii mai scade putin din rosu
-    public static Scalar lowerYellow = new Scalar(10, 150, 50), higherYellow = new Scalar(30, 255, 255);
+    public static Scalar lowerYellow = new Scalar(15, 165, 130), higherYellow = new Scalar(30, 255, 255);
     public static final double cameraFOV = 78;
 
     // daca nu recunoaste pachuri de sample uri posibil ca sunt prea mici, mareste treshold ul
@@ -122,9 +129,6 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
             // convert from pixel distance to virtual plane coordonates
             target = new Point(vpw / 2.d * nx, vph / 2.d * ny);
 
-
-
-
             // get the angle
             ttx.add(Math.atan2(target.x, 1));
             tty.add(Math.atan2(target.y, 1));
@@ -152,6 +156,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
         ty = tty;
         mask.release();
         tmp.release();
+
         poseWhenSnapshoted = Localizer.getCurrentPosition();
 
         return input;
@@ -161,7 +166,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
         public double x;
         public double y;
 
-        SamplePoint(double x, double y) {
+        public SamplePoint(double x, double y) {
             this.x = x;
             this.y = y;
         }
@@ -179,21 +184,60 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
         }
         return Double.compare(p1.x, p2.x); // lower x first
     };
-    public static final double XLimit = 1250,YLimit = 1670;
+
+    public class ClosestToOriginComparator implements Comparator<SamplePoint>{
+        public int compare(SamplePoint p1,SamplePoint p2){
+
+            double dist1 = p1.x * p1.x + p1.y*p1.y;
+            double dist2 = p2.x * p2.x + p2.y*p2.y;
+
+            return Double.compare(dist1,dist2);
+        }
+    }
+    public static final double XLimit = 1400,YLimit = 1670;
+    public static final double XLowLimit = 850;
 
     public synchronized PriorityQueue<SamplePoint> getSamplesPrioritized(){
         PriorityQueue<SamplePoint> orderedSamples = new PriorityQueue<SamplePoint>(pointComparator);
         for(int i=1;i<tx.size();i++)
         {
-            RobotInitializers.Dashtelemetry.addLine("(" + tx.get(i) + ")");
-            RobotInitializers.Dashtelemetry.addLine("(" + ty.get(i) + ")");
             SparkFunOTOS.Pose2D globalSample = GetSamplePosition.GetGlobalSamplePosition(Math.toDegrees(tx.get(i)), Math.toDegrees(ty.get(i)));
             RobotInitializers.Dashtelemetry.addLine(new SamplePoint(globalSample.x,globalSample.y).toString());
-            if(globalSample.x > XLimit || globalSample.y > YLimit)
+            if(globalSample.x > XLimit || globalSample.y > YLimit || globalSample.x < XLowLimit)
                 continue;
             orderedSamples.add(new SamplePoint(globalSample.x,globalSample.y));
         }
         return orderedSamples;
+    }
+
+    public SparkFunOTOS.Pose2D calculateWhereExtendoEndUp(int extendoDist,double wantedH){
+        double z = ExtendoToDistance(extendoDist);
+        double h = Localizer.normalizeRadians(wantedH);
+        double x_contribution = z * Math.cos(h);
+        double y_contribution = z * Math.sin(h);
+        SparkFunOTOS.Pose2D normalized = GetSamplePosition.normalize_pos(poseWhenSnapshoted);
+        return new SparkFunOTOS.Pose2D(x_contribution + normalized.x,y_contribution + normalized.y,0);
+    }
+
+    public synchronized SamplePoint getBestTxTy(){
+        double mini = 1e9;
+        double besttx = 0,bestty = 0;
+        for(int i=1;i<tx.size();i++)
+        {
+            SparkFunOTOS.Pose2D data = GetSamplePosition.getExtendoRotPair(Math.toDegrees(tx.get(i)),Math.toDegrees(ty.get(i)));
+            /*SparkFunOTOS.Pose2D extendo_in_field = calculateWhereExtendoEndUp((int)data.x,data.h);
+            RobotLog.ii("sample effort","x: " + extendo_in_field.x + "y: " + extendo_in_field.y);
+            if(extendo_in_field.x > XLimit || extendo_in_field.y > YLimit || extendo_in_field.x < XLowLimit)
+                continue;*/
+            if(data.x < 300 || data.x > Extendo.MaxExtension-100 && Math.abs(Localizer.getAngleDifference(Math.toRadians(0),data.h)) > Math.toRadians(15))
+                continue;
+            if(data.x < mini){
+                mini = data.x;
+                besttx = Math.toDegrees(tx.get(i));
+                bestty = Math.toDegrees(ty.get(i));
+            }
+        }
+        return new SamplePoint(besttx,bestty);
     }
 
     public synchronized List<Double> getTx(){
@@ -208,7 +252,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
     public synchronized int getNODetections(){
         return centroids.rows();
     }
-    public static synchronized SparkFunOTOS.Pose2D getPoseAtDetectionTime(){
+    public synchronized SparkFunOTOS.Pose2D getPoseAtDetectionTime(){
         return poseWhenSnapshoted;
     }
 }

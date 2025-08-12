@@ -17,7 +17,7 @@ import org.opencv.core.Mat;
 @Config
 public class Lift {
 
-    public static double MaxHighBasketPos = 850;
+    public static double MaxHighBasketPos = 820;
     public static double MaxLowBasketPos = 350;
     public static CachedMotor motor1,motor2,encoder;
     public static double LowBasketPos = 300,HighBasketPos = 800;
@@ -71,6 +71,8 @@ public class Lift {
     }
 
     public static void update(){
+        Dashtelemetry.addData("state lift", state);
+        Dashtelemetry.addData("lift ticks", getPosition());
         switch (state){
             case OFF:
                 setLiftPower(0);
@@ -83,7 +85,7 @@ public class Lift {
                 break;
             case RETRACTING:
                 setLiftPower(-1);
-                if(motor1.getCurrent(CurrentUnit.AMPS) >= 4 && Math.abs(encoder.getVelocity()) <= 5)
+                if(motor1.getCurrent(CurrentUnit.AMPS) >= 4 && motor2.getCurrent(CurrentUnit.AMPS) >= 4  && Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40)
                 {
                     setLiftPower(0);
                     encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

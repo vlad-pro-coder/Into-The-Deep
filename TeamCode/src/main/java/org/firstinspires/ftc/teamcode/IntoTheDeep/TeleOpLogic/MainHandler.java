@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic.DropSampleAndRetract.DropSampleAndRetractActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic.HighBasketScore.HighBasketScoreActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic.LowBasketScore.LowBasketScoreActions;
-import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.PanicActions.PanicElevatorPos.PanicElevatorDownActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.PanicActions.PanicElevatorPos.PanicElevatorUpActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.PanicActions.PanicReset.PanicResetActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SwitchToSamples.SwitchToSampsActions;
@@ -17,9 +16,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Scheduler;
-import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
-import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Lift;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 
@@ -53,7 +50,7 @@ public class MainHandler {
     }
 
     public void IntakeActions(){
-        if(Extendo.state != Extendo.ExtendoStates.FREEWILL) {
+        if(CurrentState == ActionStates.SAMPLEBASKET && !currentTasks.IsSchedulerDone()) {
             RobotInitializers.Dashtelemetry.addLine("error cannot move extendo in free to move intake");
             return;
         }
@@ -71,7 +68,7 @@ public class MainHandler {
         else {
             Intake.DropUp();
             Intake.StopSpinner();
-            if(Intake.HasMixedTeamPiece())
+            if(Intake.HasMixedTeamPiece() && CurrentState != ActionStates.SAMPLEBASKET)
                 Intake.Block();
             else
                 Intake.Unblock();
@@ -83,7 +80,7 @@ public class MainHandler {
 
         IntakeActions();
 
-        if(gm2.triangle!=prev2.triangle && gm2.triangle && currentTasks.IsSchedulerDone()){
+        /*if(gm2.triangle!=prev2.triangle && gm2.triangle && currentTasks.IsSchedulerDone()){
             if(mode == modes.SAMPLES && CurrentState == ActionStates.SPECIMENGRABANDSTAYIDLE){
                 currentTasks.AddAnotherScheduler(SwitchToSpecsActions);
                 mode = modes.SPECIMENS;
@@ -94,21 +91,25 @@ public class MainHandler {
                 mode = modes.SAMPLES;
                 CurrentState = ActionStates.SPECIMENGRABANDSTAYIDLE;
             }
-        }
+        }*/
 
         if(gm1.circle != prev1.circle && gm1.circle)
         {
             currentTasks.clear();
-            currentTasks.AddAnotherScheduler(PanicResetActions);
+            currentTasks.AddAnotherScheduler(PanicResetActions());
             if(mode == modes.SAMPLES)
                 CurrentState = ActionStates.SAMPLETRANSFER;
             else
                 CurrentState = ActionStates.SPECIMENGRABANDSTAYIDLE;
         }
-        if(gm1.circle && gm1.dpad_up != prev1.dpad_up && gm1.dpad_up)
-            currentTasks.AddAnotherScheduler(PanicElevatorUpActions);
-        if(gm1.circle && gm1.dpad_down != prev1.dpad_down && gm1.dpad_down)
-            currentTasks.AddAnotherScheduler(PanicElevatorDownActions);
+        if(gm1.triangle != prev1.triangle && gm1.triangle) {
+            currentTasks.clear();
+            currentTasks.AddAnotherScheduler(PanicElevatorUpActions());
+            if(mode == modes.SAMPLES)
+                CurrentState = ActionStates.SAMPLETRANSFER;
+            else
+                CurrentState = ActionStates.SPECIMENGRABANDSTAYIDLE;
+        }
 
 
         switch (mode){
@@ -116,19 +117,22 @@ public class MainHandler {
                 switch (CurrentState){
                     case SAMPLETRANSFER:
                         if(currentTasks.IsSchedulerDone() && (Intake.HasMixedTeamPiece() || (gm2.square != prev2.square && gm2.square))) {
-                            currentTasks.AddAnotherScheduler(TransferSampleActions);
+                            currentTasks.AddAnotherScheduler(TransferSampleActions());
                             CurrentState = ActionStates.SAMPLEBASKET;
                         }
                         break;
                     case SAMPLEBASKET:
                         if(currentTasks.IsSchedulerDone()) {
                             if(gm1.dpad_up != prev1.dpad_up && gm1.dpad_up) {
-                                currentTasks.AddAnotherScheduler(HighBasketScoreActions);
+                                currentTasks.AddAnotherScheduler(HighBasketScoreActions());
                                 DidLiftSampleUp = true;
                             }
                             if(gm1.dpad_down != prev1.dpad_down && gm1.dpad_down) {
-                                currentTasks.AddAnotherScheduler(LowBasketScoreActions);
+                                currentTasks.AddAnotherScheduler(LowBasketScoreActions());
                                 DidLiftSampleUp = true;
+                            }
+                            if(gm1.cross != prev1.cross && gm1.cross && DidLiftSampleUp){
+                                Outtake.closeClaw();
                             }
                             if(gm1.square != prev1.square && gm1.square && DidLiftSampleUp)
                                 CurrentState = ActionStates.RETRACTINGSAMPLE;

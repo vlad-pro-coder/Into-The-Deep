@@ -53,7 +53,16 @@ public class Logitech920 {
             }
 
         });
-        FtcDashboard.getInstance().startCameraStream(webcam, 0);
+        FtcDashboard.getInstance().startCameraStream(webcam,0);
+    }
+
+    public void ShutDownCamera(){
+        webcam.closeCameraDeviceAsync(new OpenCvCamera.AsyncCameraCloseListener() {
+            @Override
+            public void onClose() {
+                //closed camera
+            }
+        });
     }
 
 

@@ -14,12 +14,18 @@ public class StorageColorTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         RobotInitializers.InitializeFull(hardwareMap);
 
+
         waitForStart();
 
         while (opModeIsActive()){
+            Intake.colorsensor.getColorSeenBySensor();
             RobotInitializers.Dashtelemetry.addData("color", Intake.getStorageStatus());
             RobotInitializers.Dashtelemetry.addData("disatnce",Intake.rangesensor.getDist());
             RobotInitializers.Dashtelemetry.addData("isagaisttrapdoor",Intake.SampleReachedTrapDoor());
+            RobotInitializers.Dashtelemetry.addData("r",Intake.colorsensor.RGB.R);
+            RobotInitializers.Dashtelemetry.addData("g",Intake.colorsensor.RGB.G);
+            RobotInitializers.Dashtelemetry.addData("b",Intake.colorsensor.RGB.B);
+            RobotInitializers.Dashtelemetry.addData("d",Intake.colorsensor.RGB.D);
             RobotInitializers.Dashtelemetry.update();
         }
     }
