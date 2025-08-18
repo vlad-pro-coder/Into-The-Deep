@@ -1,13 +1,17 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents;
 
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.GetSamplePosition.MMToEncoderTicks;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Lift.LIFTSTATES.CUSTOMMOTORPOWER;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers.Dashtelemetry;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers.ExpansionHubDigital;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleopsStarter.gm1;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.PIDController;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.CachedMotor;
@@ -21,18 +25,22 @@ public class Extendo {
         FREEWILL,
         GOTOPOS,
         CUSTOMMOTORPOWER,
+        BALANCEFROMPOINT
     }
 
     public static CachedMotor motor, encoder;
-    public static PIDController pidController = new PIDController(0.0075, 0, 0.0002);
+    public static PIDController pidController = new PIDController(0.0075, 0, 0.0002),
+                                pidBalancing = new PIDController(-0.13,0,0);
     public static LimitSwitch lm;
     public static final int MaxExtension = 880;
     public static ExtendoStates state = ExtendoStates.RETRACTING;
     public static boolean DoingAuto = false;
-    private static double lastRegisteredPos = 0;
+    private static boolean wasHoldPosOnce = false;
     private static double PowerToMotors = 0;
-    public static double TimeoutToStabilize = 0.5;
-    private static double t = -1;
+    public static double TimeoutToStabilize = 0.3;
+    public static SparkFunOTOS.Pose2D chosenpos = new SparkFunOTOS.Pose2D(0,0,0);
+    public static boolean chosenPoint = false;
+    private static ElapsedTime time = new ElapsedTime();
 
     public static void setExtendoPos(double Pos) {
         Pos = Math.max(0, Math.min(Pos, MaxExtension));
@@ -58,37 +66,45 @@ public class Extendo {
         switch (state) {
             case FREEWILL:
                 if (-gm1.right_stick_y >= 0.05 && getPosition() <= MaxExtension - 30) {
-                    t = -1;
+                    time.reset();
                     motor.setPower(-Math.signum(gm1.right_stick_y) * (gm1.right_stick_y * gm1.right_stick_y));
-                    lastRegisteredPos = getPosition();
+                    wasHoldPosOnce = false;
                 } else if (-gm1.right_stick_y <= -0.05 && getPosition() >= 30) {
-                    t = -1;
+                    time.reset();
                     motor.setPower(-Math.signum(gm1.right_stick_y) * (gm1.right_stick_y * gm1.right_stick_y));
-                    lastRegisteredPos = getPosition();
+                    wasHoldPosOnce = false;
                 }
-                if (t == -1)
-                    t = System.currentTimeMillis();
-                if (t / 1000 > TimeoutToStabilize) {
-                    setExtendoPos(lastRegisteredPos);
-                    motor.setPower(pidController.calculatePower(getPosition()));
+                else{
+                    if (time.seconds() > TimeoutToStabilize)
+                    {
+                        if(!wasHoldPosOnce){
+                            wasHoldPosOnce = true;
+                            setExtendoPos(getPosition());
+                        }
+                        motor.setPower(pidController.calculatePower(getPosition()));
+                    }
+                    else {
+                        motor.setPower(0);
+                    }
                 }
+
                 break;
 
             case RETRACTING:
 
                 motor.setPower(-1);
-                boolean isLMactive = true;
+                boolean ShouldReset;
                 try {
-                    lm.getState();
+                    ShouldReset = lm.getState();
                 } catch (Exception e) {
-                    isLMactive = false;
-                    Dashtelemetry.addData("extendo limit switch not operational", "");
+                    ShouldReset = motor.getCurrent(CurrentUnit.AMPS) >= 4 && Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40;
+                    Dashtelemetry.addData("lift limit switch not operational", "");
                 }
-                if ((isLMactive && lm.getState()) || (motor.getCurrent(CurrentUnit.AMPS) >= 4 && Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40)) {
+                if (ShouldReset) {
                     motor.setPower(0);
                     encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    lastRegisteredPos = 0;
+                    setExtendoPos(0);
                     if (!DoingAuto)
                         state = ExtendoStates.FREEWILL;
                     else {
@@ -98,10 +114,27 @@ public class Extendo {
                 }
                 break;
             case GOTOPOS:
+                chosenPoint = false;
                 motor.setPower(pidController.calculatePower(getPosition()));
                 break;
             case CUSTOMMOTORPOWER:
                 motor.setPower(PowerToMotors);
+                break;
+            case BALANCEFROMPOINT:
+                if(!chosenPoint) {
+                    chosenpos = Localizer.getCurrentPosition();
+                    chosenPoint = true;
+                    setExtendoPos(0);
+                }
+                if(chosenPoint){
+                    double distanceInMM = Localizer.getDistanceFromTwoPoints(chosenpos,Localizer.getCurrentPosition());
+                    setExtendoPos(MMToEncoderTicks(distanceInMM));
+                }
+                if(getPosition() < 100)
+                    Intake.DropUp();
+                else
+                    Intake.DropDown();
+                motor.setPower(pidController.calculatePower(getPosition()));
                 break;
         }
     }

@@ -16,17 +16,16 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 
 @Config
 public class GetSamplePosition {
-    public static double spool = 16,RA=4.75;
+    public static double spool = 17.883,RA=4.2619161106;
     public static int CPR = 28;
     public static double ExtendoToDistance(int e){
-        return (2*Math.PI*spool/RA) * ((double)e/CPR);
+        return (2.0*Math.PI*spool/RA) * ((double)e/CPR);
     }
-    public static double initialAngle = Math.toRadians(25), h = 261.817, centerToExtendo = 160;// COY = 140
+    public static double initialAngle = Math.toRadians(25), h = 261.817, centerToExtendo = 162;// COY = 140
     public static double cameraOffsetX = 142.621, cameraOffsetY = 107.053;
-    public static double centerOffsetToDownRightX = 135.64,centerOffsetToDownRightY = 158.502;
     public static double CameraAngleFromCenterPoint = Math.atan(cameraOffsetY/cameraOffsetX);//de schimbat
     public static int MMToEncoderTicks(double distance){
-        return (int)(distance / (2 * Math.PI * 16 / 4.75)) * 28;
+        return (int)( distance * CPR * RA / ( 2.0 * Math.PI * spool ));
     }
 
     public static boolean hasId(LLResult res, int id){

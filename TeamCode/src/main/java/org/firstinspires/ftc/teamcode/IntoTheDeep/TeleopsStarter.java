@@ -1,6 +1,11 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep;
 
 
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Climb.Climb.ClimbActions;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Climb.ClimbConstants.ClimbUnderWay;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Climb.Climb.updateClimb;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Climb.ClimbConstants.tasks;
+
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -33,6 +38,7 @@ public class TeleopsStarter {
         RobotInitializers.disable();
         ActionHandler = new MainHandler();
         team = color;
+        ClimbUnderWay = false;
     }
 
     public double getPowerSigned(double h, double p){
@@ -46,6 +52,18 @@ public class TeleopsStarter {
 
     public void update(){
         RobotInitializers.clearCache();
+
+        if(ClimbUnderWay)
+        {
+            updateClimb();
+            return ;
+        }
+
+        if(gm1.left_stick_button && gm1.right_stick_button)
+        {
+            tasks.AddAnotherScheduler(ClimbActions());
+            ClimbUnderWay = true;
+        }
 
         if(Lift.getPosition() > 500){
             tSpeed = 0.6;

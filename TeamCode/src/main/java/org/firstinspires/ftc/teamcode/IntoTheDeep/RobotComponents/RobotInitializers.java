@@ -95,6 +95,7 @@ public class RobotInitializers {
         ExpansionHubServos = hm.get(ServoController.class, "Expansion Hub 2");
 
         ControlHubDigital = hm.get(DigitalChannelController.class,"Control Hub");
+        ExpansionHubDigital = hm.get(DigitalChannelController.class,"Expansion Hub 2");
 
         IMUBNO085.controller = hm.get(DigitalChannelController.class, "Expansion Hub 2");
         try {
@@ -168,11 +169,19 @@ public class RobotInitializers {
         InitializeLift();
         InitializeOuttake();
         InitializeClimbRelated();
+        changeDirectionForClimb();
     }
 
     public static void InitializeCamera(HardwareMap hm){
         Limelight3A c = hm.get(Limelight3A.class, "camera");
         c.shutdown();
+    }
+
+    public static void changeDirectionForClimb(){
+        PtoAndWheelie.FL = new CachedMotor(ControlHubMotors, 1, DcMotorSimple.Direction.FORWARD);
+        PtoAndWheelie.FR = new CachedMotor(ExpansionHubMotors, 0, DcMotorSimple.Direction.FORWARD);
+        PtoAndWheelie.BL = new CachedMotor(ControlHubMotors, 0, DcMotorSimple.Direction.REVERSE);
+        PtoAndWheelie.BR = new CachedMotor(ExpansionHubMotors, 2, DcMotorSimple.Direction.REVERSE);
     }
     public static void InitializeChassis(){
         Chassis.FL = new CachedMotor(ControlHubMotors, 1, DcMotorSimple.Direction.FORWARD);
@@ -199,8 +208,10 @@ public class RobotInitializers {
 
     public static void InitializeExtendo(){
         Extendo.motor = new CachedMotor(ExpansionHubMotors, 3, DcMotorSimple.Direction.FORWARD);
+        Extendo.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Extendo.encoder = new CachedMotor(ExpansionHubMotors, 1, DcMotorSimple.Direction.FORWARD);
         Extendo.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Extendo.pidBalancing.setTargetPosition(imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES));
         Extendo.lm = new LimitSwitch(ExpansionHubDigital,1);
         MotorConfigurationType m = Extendo.motor.getMotorType();
         m.setAchieveableMaxRPMFraction(1.0);
@@ -210,6 +221,7 @@ public class RobotInitializers {
         Lift.motor1 = new CachedMotor(ExpansionHubMotors, 1, DcMotorSimple.Direction.FORWARD);
         Lift.motor2 = new CachedMotor(ControlHubMotors, 2, DcMotorSimple.Direction.REVERSE);
         Lift.encoder = new CachedMotor(ControlHubMotors, 2, DcMotorSimple.Direction.REVERSE);
+        Lift.lm = new LimitSwitch(ControlHubDigital,1);
         Lift.motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Lift.motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
@@ -229,7 +241,7 @@ public class RobotInitializers {
     public static void InitializeForOperation(){
         Lift.state = Lift.LIFTSTATES.RETRACTING;
         Extendo.state = Extendo.ExtendoStates.RETRACTING;
-        Outtake.armProfile.setInstant(OverHeadTakeSampPos);
+        Outtake.armProfile.setInstant(OverHeadTakeSampPos-1);
         Outtake.OverHead_TAKESAMPLE();
         Outtake.setExtensionPos(0);
         Outtake.openClaw();

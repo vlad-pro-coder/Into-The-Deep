@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.LinearFunction;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.PIDController;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.CachedMotor;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.LimitSwitch;
 import org.opencv.core.Mat;
 
 @Config
@@ -23,6 +24,7 @@ public class Lift {
     public static double LowBasketPos = 300,HighBasketPos = 800;
     private static double currentPos = 0;
     private static double PowerToMotors = 0;
+    public static LimitSwitch lm;
     public static PIDController pidController = new PIDController(0.0065,0.0003,0.0003);
     public static boolean DoingAuto = false;
 
@@ -85,7 +87,14 @@ public class Lift {
                 break;
             case RETRACTING:
                 setLiftPower(-1);
-                if(motor1.getCurrent(CurrentUnit.AMPS) >= 4 && motor2.getCurrent(CurrentUnit.AMPS) >= 4  && Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40)
+                boolean ShouldReset;
+                try {
+                    ShouldReset = lm.getState();
+                } catch (Exception e) {
+                    ShouldReset = motor1.getCurrent(CurrentUnit.AMPS) >= 4 && motor2.getCurrent(CurrentUnit.AMPS) >= 4  && Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40;
+                    Dashtelemetry.addData("lift limit switch not operational", "");
+                }
+                if(ShouldReset)
                 {
                     setLiftPower(0);
                     encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

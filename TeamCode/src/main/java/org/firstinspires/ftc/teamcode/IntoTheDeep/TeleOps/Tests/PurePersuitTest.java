@@ -68,7 +68,8 @@ public class PurePersuitTest extends LinearOpMode {
         while (opModeInInit()){
             Localizer.Update();
             RobotInitializers.clearCache();
-            Chassis.setTargetPosition(new SparkFunOTOS.Pose2D(451, -206,HEADING_fromsubmersibletobasket));
+            Chassis.setTargetPosition(new SparkFunOTOS.Pose2D(445, -175,HEADING_fromsubmersibletobasket));
+            Chassis.update();
             RobotInitializers.Dashtelemetry.addData("x",Localizer.getCurrentPosition().x);
             RobotInitializers.Dashtelemetry.addData("y",Localizer.getCurrentPosition().y);
             RobotInitializers.Dashtelemetry.addData("h",Localizer.getCurrentPosition().h);
@@ -86,7 +87,6 @@ public class PurePersuitTest extends LinearOpMode {
             Chassis.update();
             Localizer.Update();
             RobotInitializers.Dashtelemetry.addData("",pinPoint.getFrequency());
-            RobotInitializers.Dashtelemetry.update();
         }
     }
 }

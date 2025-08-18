@@ -25,7 +25,6 @@ public class BLUE extends LinearOpMode {
         RobotInitializers.enable();
         while (opModeIsActive()){
             opmode.update();
-            RobotInitializers.Dashtelemetry.update();
         }
     }
 }

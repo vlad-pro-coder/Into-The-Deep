@@ -22,7 +22,7 @@ public class SimultaniosSampleGrabingScoring {
                     protected void Actions() {
                         Chassis.setTargetPosition(PosToScoreSample);
                         Outtake.setExtensionPos(EXTENSION_readytakesample);
-                        Lift.CustomPowerToMotors(-0.4);
+                        Lift.CustomPowerToMotors(-0.5);
                     }
 
                     @Override
@@ -38,7 +38,7 @@ public class SimultaniosSampleGrabingScoring {
 
                     @Override
                     protected boolean Conditions() {
-                        return Outtake.IsClawDone() && Chassis.IsPositionDone(200) && Chassis.IsHeadingDone(25);
+                        return Outtake.IsClawDone() && Chassis.IsPositionDone(250) && Chassis.IsHeadingDone(20);
                     }
                 })
                 .addTask(new Task() {
@@ -47,9 +47,30 @@ public class SimultaniosSampleGrabingScoring {
                         Lift.state = Lift.LIFTSTATES.FREEWILL;
                         Lift.setLiftPos(LiftOverbasket);
                         Outtake.setOverHeadPos(overbasketangle);
-                        Outtake.setExtensionPos(extensionoverbasket);
-                        Extendo.setExtendoPos(ExtendoPos-200);
                         Intake.Unblock();
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Lift.getPosition() > 200;
+                    }
+                })
+
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Outtake.setExtensionPos(extensionoverbasket);
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Chassis.IsPositionDone(100) && Chassis.IsHeadingDone(5);
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Extendo.setExtendoPos(ExtendoPos-200);
                     }
 
                     @Override
@@ -66,7 +87,7 @@ public class SimultaniosSampleGrabingScoring {
 
                     @Override
                     protected boolean Conditions() {
-                        return Lift.IsLiftDone(150) && Outtake.OverHeadDoneness() && Outtake.ExtensionDoneness() && Chassis.IsPositionDone(80) && Chassis.IsHeadingDone(5);
+                        return Lift.IsLiftDone(150) && Outtake.OverHeadDoneness(5) && Outtake.ExtensionDoneness() && Chassis.IsPositionDone(80) && Chassis.IsHeadingDone(5);
                     }
                 })
                 .addTask(new Task() {
@@ -98,11 +119,12 @@ public class SimultaniosSampleGrabingScoring {
                         Outtake.setExtensionPos(EXTENSION_idle);
                         Outtake.setOverHeadPos(OVERHEAD_idle);
                         Extendo.setExtendoPos(ExtendoPos);
+                        Outtake.closeClaw();
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Outtake.OverHeadDoneness(120);
+                        return Outtake.OverHeadDoneness(60);
                     }
                 })
                 .addTask(new Task() {
@@ -146,10 +168,21 @@ public class SimultaniosSampleGrabingScoring {
 
                     @Override
                     protected boolean Conditions() {
-                        return true;
+                        return Lift.getPosition() < 30;
                     }
                 })
-                .waitSeconds(0.1)
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Outtake.openClaw();
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Outtake.IsClawDone();
+                    }
+                })
+                .waitSeconds(0.05)
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
@@ -158,7 +191,7 @@ public class SimultaniosSampleGrabingScoring {
 
                     @Override
                     protected boolean Conditions() {
-                        return Lift.getPosition() < 30 && Extendo.getPosition() < 30;
+                        return Extendo.getPosition() < 30;
                     }
                 });
     }

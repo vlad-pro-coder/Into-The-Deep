@@ -74,7 +74,7 @@ public class PurePersuit {
 
     public boolean AngleDone(double errorAngle){
         if(indLine+1 == Path.size())
-            return Localizer.getAngleDifference(getTargetPosition().h,Localizer.getCurrentPosition().h) <= errorAngle;
+            return Localizer.getAngleDifference(getTargetPosition().h,Localizer.getCurrentPosition().h) <= Math.toRadians(errorAngle);
         return false;
     }
 

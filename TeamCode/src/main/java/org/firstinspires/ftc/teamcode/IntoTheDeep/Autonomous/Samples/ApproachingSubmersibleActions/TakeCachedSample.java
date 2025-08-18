@@ -6,12 +6,14 @@ import static org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.GetSamplePo
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Scheduler;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Task;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.CameraPipelines.YellowSampleDetectionPipeline;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Chassis;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake;
 
 public class TakeCachedSample {
     public static Scheduler TakeCachedSampleActions(YellowSampleDetectionPipeline.SamplePoint Sample, double timeout){
@@ -20,25 +22,27 @@ public class TakeCachedSample {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
+                        Chassis.Heading.setPidCoefficients(Chassis.SmallHeading);
                         Chassis.usedTrajectory = Chassis.trajectoryStates.FREEWILL;
                         Chassis.setHeading(data.h);
+                        Outtake.openClaw();
                         RobotLog.ii("taken sample"," x: " + Sample.x + " y: " + Sample.y);
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Chassis.IsHeadingDone(2);
+                        return Chassis.IsHeadingDone(3);
                     }
                 })
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        Extendo.setExtendoPos(Math.max(data.x-67,250));
+                        Extendo.setExtendoPos(data.x-30);
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Extendo.IsExtendoDone(60);
+                        return Extendo.IsExtendoDone(30);
                     }
                 })
                 .addTask(new Task() {
@@ -57,7 +61,7 @@ public class TakeCachedSample {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        Extendo.CustomPowerToMotors(0.5);
+                        Extendo.CustomPowerToMotors(0.4);
                     }
 
                     @Override
@@ -72,6 +76,7 @@ public class TakeCachedSample {
                     protected void Actions() {
                         wait = (long) (timeout * 1000);
                         track = -1;
+                        Chassis.Heading.setPidCoefficients(Chassis.NormalHeading);
                     }
 
                     @Override
@@ -82,7 +87,7 @@ public class TakeCachedSample {
 
                         boolean r = (System.currentTimeMillis() - track) >= wait;
                         if (r) track = -1;
-                        return Intake.HasMixedTeamPiece() || r;
+                        return Intake.HasMixedTeamPiece() || r;//Change In color
                     }
                 });
     }

@@ -15,14 +15,16 @@ public class boboci extends LinearOpMode {
     Sasiu sasiu;
     DcMotorEx motor;
 
+    public double ceva = 0;
+
     @Override
     public void runOpMode() throws InterruptedException {
-
+        Sasiu chassis = new Sasiu(hardwareMap);
 
         sasiu = new Sasiu(hardwareMap);
         while(opModeInInit())
         {
-
+            Sasiu.malin = 4;
         }
 
         waitForStart();

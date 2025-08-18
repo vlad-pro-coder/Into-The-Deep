@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializ
 public class LiftPID extends LinearOpMode {
 
     public static double pos = 0,lastpos = 0;
-    public static PIDCoefficients coefs= new PIDCoefficients(0,0,0);
+    public static PIDCoefficients coefs= new PIDCoefficients(0.007,0.0003,0.00033);
     public static boolean Doingfeed = true;
 
     @Override

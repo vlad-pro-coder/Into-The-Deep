@@ -19,6 +19,7 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Chassis;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Lift;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake;
 
 public class TakeSubmersibleSampleToHighBasket {
@@ -53,7 +54,7 @@ public class TakeSubmersibleSampleToHighBasket {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        Intake.RotateToEject(0.8);
+                        Intake.RotateToEject(0.6);
                     }
 
                     @Override
@@ -64,7 +65,7 @@ public class TakeSubmersibleSampleToHighBasket {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        Lift.CustomPowerToMotors(-0.4);
+                        Lift.CustomPowerToMotors(-0.5);
                         Outtake.setExtensionPos(EXTENSION_readytakesample);
                     }
 
@@ -90,40 +91,27 @@ public class TakeSubmersibleSampleToHighBasket {
                     protected void Actions() {
                         Lift.state = Lift.LIFTSTATES.FREEWILL;
                         Lift.setLiftPos(LIFT_midway);
-
-                    }
-
-                    @Override
-                    protected boolean Conditions() {
-                        return Lift.IsLiftDone(200);
-                    }
-                })
-                .addTask(new Task() {
-                    @Override
-                    protected void Actions() {
+                        Intake.Unblock();
                         Outtake.setOverHeadPos(OVERHEAD_fromsubtobasket);
-                        Outtake.setExtensionPos(EXTENSION_overbasket);
-
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Chassis.IsHeadingDone(30) && Chassis.IsPositionDone(800);
+                        return Chassis.IsHeadingDone(30) && Chassis.IsPositionDone(900);
                     }
                 })
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
+                        Extendo.state = Extendo.ExtendoStates.BALANCEFROMPOINT;
                         Lift.state = Lift.LIFTSTATES.FREEWILL;
                         Lift.setLiftPos(LIFT_high);
-                        Extendo.setExtendoPos(450);
-                        Intake.DropDown();
-                        Intake.Unblock();
+                        Outtake.setExtensionPos(EXTENSION_overbasket);
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Lift.IsLiftDone(300) && Outtake.OverHeadDoneness() && Outtake.ExtensionDoneness() && Chassis.IsHeadingDone(5) && Chassis.IsPositionDone(80);
+                        return Lift.IsLiftDone(300) && Outtake.OverHeadDoneness() && Outtake.ExtensionDoneness() && Chassis.IsHeadingDone(5) && Chassis.IsPositionDone(80) && Localizer.getVelocity().h < Math.toRadians(5) && Localizer.getVelocity().x < 70 && Localizer.getVelocity().y < 70;
                     }
                 })
                 .addTask(new Task() {
@@ -139,6 +127,17 @@ public class TakeSubmersibleSampleToHighBasket {
                         return Outtake.IsClawDone();
                     }
                 })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Chassis.Heading.setPidCoefficients(Chassis.ToSubermsibleHeading);
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return true;
+                    }
+                })
                 .StartPurePersuit(PUREPERSUIT_pathtosubmersible, HEADING_infrontofsubmersible, PUREPERSUIT_radius)
                 .addTask(new Task() {
                     @Override
@@ -149,7 +148,18 @@ public class TakeSubmersibleSampleToHighBasket {
 
                     @Override
                     protected boolean Conditions() {
-                        return Outtake.OverHeadDoneness(120);
+                        return Outtake.OverHeadDoneness(60);
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Outtake.closeClaw();
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Outtake.IsClawDone();
                     }
                 })
                 .addTask(new Task() {
@@ -160,7 +170,29 @@ public class TakeSubmersibleSampleToHighBasket {
 
                     @Override
                     protected boolean Conditions() {
-                        return Chassis.IsPositionDone(50) && Chassis.IsHeadingDone(3);
+                        return Lift.getPosition() < 30;
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Outtake.openClaw();
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Chassis.IsPositionDone(50) && Chassis.IsHeadingDone(5) && Localizer.getVelocity().h < Math.toRadians(3);
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Chassis.Heading.setPidCoefficients(Chassis.NormalHeading);
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return true;
                     }
                 });
     }

@@ -22,9 +22,9 @@ public class ChassisTestAuto extends LinearOpMode {
     public static double hdeg = 0;
     public static double h = Math.toRadians(hdeg);
 
-    public static PIDCoefficients strafe= new PIDCoefficients(-0.015,0,-0.0015);
-    public static PIDCoefficients forward = new PIDCoefficients(0.006,0,0.0015);
-    public static PIDCoefficients heading = new PIDCoefficients(1.2,0,0.13);
+    public static PIDCoefficients strafe= new PIDCoefficients(0,0,0);
+    public static PIDCoefficients forward = new PIDCoefficients(0,0,0);
+    public static PIDCoefficients heading = new PIDCoefficients(0,0,0);
 
 
     @Override

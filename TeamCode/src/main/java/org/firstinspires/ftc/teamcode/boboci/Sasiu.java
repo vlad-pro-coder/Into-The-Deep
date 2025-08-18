@@ -5,10 +5,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Sasiu {
 
-    DcMotorEx fs;
-    DcMotorEx fd;
-    DcMotorEx ss;
-    DcMotorEx sd;
+    private DcMotorEx fs;
+    private DcMotorEx fd;
+    private DcMotorEx ss;
+    private DcMotorEx sd;
+
+    public static double malin = 1;
 
     public Sasiu(HardwareMap gigel){
         fs = gigel.get(DcMotorEx.class, "stangafata");

@@ -86,17 +86,6 @@ public class PutLastSamplePredefined {
                     protected boolean Conditions() {
                         return Outtake.OverHeadDoneness(120);
                     }
-                })
-                .addTask(new Task() {
-                    @Override
-                    protected void Actions() {
-                        Lift.state = Lift.LIFTSTATES.RETRACTING;
-                    }
-
-                    @Override
-                    protected boolean Conditions() {
-                        return true;
-                    }
                 });
     }
 }

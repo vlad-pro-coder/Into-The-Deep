@@ -31,10 +31,13 @@ import kotlin.Pair;
 public class YellowSampleDetectionPipeline extends OpenCvPipeline {
     public static SparkFunOTOS.Pose2D poseWhenSnapshoted = new SparkFunOTOS.Pose2D(0,0,0);
     public static boolean showMask = false;
+    private ArrayList<SparkFunOTOS.Pose2D> failedAttempts = new ArrayList<>();
     public static Size morphologicalKernel = new Size(3, 3),
             erodeKernel = new Size(3, 3),
             dilateKernel = new Size(3, 3);
     public static int erodeSteps = 1, dilateSteps = 4, morphologySteps = 1;
+    public static double diminuator = 4.9;
+            public static double startingY = 380;
 
     // daca nu cuprinde toate sampleurile din cauza luminii mai scade putin din rosu
     public static Scalar lowerYellow = new Scalar(15, 165, 130), higherYellow = new Scalar(30, 255, 255);
@@ -42,7 +45,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
 
     // daca nu recunoaste pachuri de sample uri posibil ca sunt prea mici, mareste treshold ul
     // sau fa-l mai mic daca ia in calcul noise ul din background
-    public static double SizeTreshold = 50;
+    public static double SizeTreshold = 200;
     private Mat mask = new Mat(), tmp = new Mat(),
             labels = new Mat(), stats = new Mat(), centroids = new Mat();
 
@@ -61,6 +64,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
     }
     private List<Double> tx, ty;
     private int biggestDetectionID = 0;
+    public boolean newResultsReady = false;
 
     @Override
     public Mat processFrame(Mat input) {
@@ -222,14 +226,18 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
     public synchronized SamplePoint getBestTxTy(){
         double mini = 1e9;
         double besttx = 0,bestty = 0;
+        if(tx == null)
+            return new SamplePoint(besttx,bestty);
         for(int i=1;i<tx.size();i++)
         {
+            RobotLog.ii("tx" + i,"" + Math.toDegrees(tx.get(i)));
+            RobotLog.ii("ty" + i,"" + Math.toDegrees(ty.get(i)));
             SparkFunOTOS.Pose2D data = GetSamplePosition.getExtendoRotPair(Math.toDegrees(tx.get(i)),Math.toDegrees(ty.get(i)));
-            /*SparkFunOTOS.Pose2D extendo_in_field = calculateWhereExtendoEndUp((int)data.x,data.h);
-            RobotLog.ii("sample effort","x: " + extendo_in_field.x + "y: " + extendo_in_field.y);
-            if(extendo_in_field.x > XLimit || extendo_in_field.y > YLimit || extendo_in_field.x < XLowLimit)
-                continue;*/
-            if(data.x < 300 || data.x > Extendo.MaxExtension-100 && Math.abs(Localizer.getAngleDifference(Math.toRadians(0),data.h)) > Math.toRadians(15))
+            SparkFunOTOS.Pose2D distances = GetSamplePosition.getPositionRelativeToRobot(Math.toDegrees(tx.get(i)),Math.toDegrees(ty.get(i)));
+
+            double accepted_distance = startingY + Math.toDegrees(Math.abs(Localizer.getAngleDifference(Math.toRadians(0),data.h))) * diminuator;
+
+            if(IsIgnored(data) || distances.y < accepted_distance || data.x > Extendo.MaxExtension+100 || Math.abs(Localizer.getAngleDifference(Math.toRadians(0),data.h)) > Math.toRadians(40))
                 continue;
             if(data.x < mini){
                 mini = data.x;
@@ -238,6 +246,25 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
             }
         }
         return new SamplePoint(besttx,bestty);
+    }
+
+    private final double MaxAngleDifference = Math.toRadians(4);
+    private final double maxExtensionDifference = 50;
+
+    private boolean IsIgnored(SparkFunOTOS.Pose2D result){
+        for(SparkFunOTOS.Pose2D ignored:failedAttempts){
+            if(Math.abs(ignored.x - result.x)<=maxExtensionDifference && Math.abs(ignored.h - result.h) <= MaxAngleDifference)
+                return true;
+        }
+        return false;
+    }
+
+    public void AddResultToIgnored(SparkFunOTOS.Pose2D result){
+        failedAttempts.add(result);
+    }
+
+    public void resetIgnoredSample(){
+        failedAttempts.clear();
     }
 
     public synchronized List<Double> getTx(){

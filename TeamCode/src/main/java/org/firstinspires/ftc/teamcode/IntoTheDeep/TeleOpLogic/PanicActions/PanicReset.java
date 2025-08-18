@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.PanicActions;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Scheduler;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Task;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Lift;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake;
 
@@ -36,6 +37,17 @@ public class PanicReset {
                     @Override
                     protected boolean Conditions() {
                         return Lift.getPosition() < 30;
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Intake.isStorageEmpty();
                     }
                 });
     }

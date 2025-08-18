@@ -24,6 +24,10 @@ public class Chassis {
     public static PIDController Strafe = new PIDController(-0.015,0,-0.002),
             Forward = new PIDController(0.006,0,0.0015),
             Heading = new PIDController(1.1,0,0.06);
+    public static PIDCoefficients SmallHeading = new PIDCoefficients(1.8,0,0.07),
+                                    NormalHeading = new PIDCoefficients(1.1,0,0.06),
+                                    ToSubermsibleHeading = new PIDCoefficients(0.65,0,0.4);
+
 
     static{
         Strafe.setFreq(30);
@@ -86,7 +90,7 @@ public class Chassis {
     public static boolean IsHeadingDone(double error_heading){
         switch (usedTrajectory){
             case FREEWILL:
-                return Localizer.getAngleDifference(getTargetPosition().h,Localizer.getCurrentPosition().h) <= error_heading;
+                return Localizer.getAngleDifference(getTargetPosition().h,Localizer.getCurrentPosition().h) <= Math.toRadians(error_heading);
             case FOLLOWINGPUREPERSUIT:
                 return PurePersuitTrajectory.AngleDone(error_heading);
             case FOLLOWINGBEZIERCURVE:

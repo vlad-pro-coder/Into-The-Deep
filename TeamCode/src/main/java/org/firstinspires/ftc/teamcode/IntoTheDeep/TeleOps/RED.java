@@ -25,7 +25,6 @@ public class RED extends LinearOpMode {
 
         while (opModeIsActive()){
             opmode.update();
-            RobotInitializers.Dashtelemetry.update();
         }
     }
 }

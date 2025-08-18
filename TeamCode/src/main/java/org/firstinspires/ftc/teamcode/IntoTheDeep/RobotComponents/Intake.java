@@ -25,7 +25,7 @@ public class Intake {
     public static RGBsensor colorsensor;
     public static RangeSensor rangesensor;
     public static double dropdownAngle = 185,dropupAngle = 290,startDropDownUpCorrection = 230;
-    public static double NotBlockingPos = 27,BlockingPos = 170;
+    public static double NotBlockingPos = 22,BlockingPos = 170;
 
 
     public static void Block(){
@@ -61,7 +61,7 @@ public class Intake {
     }
 
     public static SampleType getStorageStatus(){
-        if(colorsensor.getDistance(DistanceUnit.CM) >= 4.3) return SampleType.NONE;
+        if(colorsensor.getDistance(DistanceUnit.CM) >= 6) return SampleType.NONE;
         switch (colorsensor.getColorSeenBySensor()){
             case RED:
                 return SampleType.RED;
@@ -74,7 +74,7 @@ public class Intake {
         }
     }
     public static boolean SampleReachedTrapDoor(){
-        return rangesensor.getDist() <= 9;//in cm
+        return rangesensor.getDist() <= 7.1;//in cm
     }
     public static boolean isStorageEmpty(){
         return getStorageStatus() == SampleType.NONE;
@@ -91,6 +91,5 @@ public class Intake {
     public static boolean HasWrongTeamPiece() {
         return !HasExactTeamPiece();
     }
-
 
 }

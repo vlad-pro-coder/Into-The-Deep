@@ -7,9 +7,11 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.configuration.annotations.DeviceProperties;
 import com.qualcomm.robotcore.hardware.configuration.annotations.I2cDeviceType;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.Colors;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 
 @I2cDeviceType
 @DeviceProperties(
@@ -40,7 +42,7 @@ public class RGBsensor extends RevColorSensorV3 implements HardwareDevice {
         changeLEDsettings(LEDPulseModulation.LED_PULSE_100kHz, LEDCurrent.CURRENT_5mA);
         timeDistance = System.currentTimeMillis();
         timeRGB = System.currentTimeMillis();
-        setFreqToUpdate(10);
+        setFreqToUpdate(20);
     }
     public void changeLEDsettings(LEDPulseModulation l, LEDCurrent c){
         setLEDParameters(l, c);
@@ -75,7 +77,7 @@ public class RGBsensor extends RevColorSensorV3 implements HardwareDevice {
                 timeRGB = System.currentTimeMillis();
             }
         } catch (Exception ignored){
-
+            RobotLog.ii("cur mort de senzor","mort");
         }
         return Colors.getColorFromRGB(new Colors.Color(RGB.R, RGB.G, RGB.B, RGB.D));
     }

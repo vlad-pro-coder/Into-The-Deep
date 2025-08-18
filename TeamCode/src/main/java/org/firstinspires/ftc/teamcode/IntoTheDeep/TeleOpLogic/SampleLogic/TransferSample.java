@@ -19,8 +19,9 @@ public class TransferSample {
                         Outtake.setExtensionPos(0);
                         Outtake.OverHead_TAKESAMPLE();
                         Intake.RotateToStore();
-                        Extendo.state = Extendo.ExtendoStates.RETRACTING;
                         Intake.DropUp();
+                        Lift.state = Lift.LIFTSTATES.FREEWILL;
+                        Lift.setLiftPos(50);
                     }
 
                     @Override
@@ -28,7 +29,7 @@ public class TransferSample {
                         return Intake.SampleReachedTrapDoor();
                     }
                 })
-                .waitSeconds(0.15)
+                .waitSeconds(0.1)
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
@@ -45,12 +46,34 @@ public class TransferSample {
                     @Override
                     protected void Actions() {
                         Intake.RotateToEject();
+                        Extendo.state = Extendo.ExtendoStates.RETRACTING;
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Extendo.getPosition() < 20 && Extendo.state != Extendo.ExtendoStates.RETRACTING;
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Lift.state = Lift.LIFTSTATES.RETRACTING;
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Lift.getPosition() < 20 && Lift.state != Lift.LIFTSTATES.RETRACTING;
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
                         Lift.CustomPowerToMotors(-0.5);
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Extendo.getPosition() < 30 && Lift.getPosition() < 30;
+                        return true;
                     }
                 })
                 .waitSeconds(0.15)

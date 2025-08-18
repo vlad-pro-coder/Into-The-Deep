@@ -4,7 +4,6 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public class Colors {
-    public static double ColorMaxDifference = 120;
     public static class Color{
         public double r, g, b, d;
         public Color(double r, double g, double b, double d){
@@ -16,16 +15,16 @@ public class Colors {
 
     }
     public enum ColorType {
-        BLUE(new Color(0.4, 0.7, 1.3, 2)),
-        BLUE1(new Color(0.2, 0.4, 0.4, 3.4)),
+        BLUE(new Color(0.37, 0.72, 1.6, 2.6)),
+        BLUE1(new Color(0.14, 0.29, 0.52, 5.1)),
 
-        RED(new Color(1.1, 0.8, 0.3, 2)),
-        RED1(new Color(0.5, 0.4, 0.2, 3)),
-        RED2(new Color(0.8, 0.6, 0.3, 2.6)),
+        RED(new Color(0.41, 0.28, 0.16, 5.22)),
+        RED1(new Color(0.82, 0.44, 0.23,3.2)),
+        RED2(new Color(1.69, 0.82, 0.41, 2)),
 
-        YELLOW(new Color(2.3, 3.2, 0.7, 1.5)),
-        YELLOW1(new Color(0.6, 0.8, 0.2, 3.1)),
-        YELLOW2(new Color(1, 1.41, 0.47, 3)),
+        YELLOW(new Color(0.6, 0.74, 0.21, 5.25)),
+        YELLOW1(new Color(1.27, 1.33, 0.32, 4)),
+        YELLOW2(new Color(2.7, 3, 0.63, 2)),
 
         NONE(new Color(0.2, 0.3, 0.2, 4));
 
