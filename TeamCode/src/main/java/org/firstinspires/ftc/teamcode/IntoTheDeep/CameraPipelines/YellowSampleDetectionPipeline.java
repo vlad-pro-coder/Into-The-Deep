@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.GetSamplePosition;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.PinPoint;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -30,6 +31,7 @@ import kotlin.Pair;
 @Config
 public class YellowSampleDetectionPipeline extends OpenCvPipeline {
     public static SparkFunOTOS.Pose2D poseWhenSnapshoted = new SparkFunOTOS.Pose2D(0,0,0);
+    private static int radius = 10;
     public static boolean showMask = false;
     private ArrayList<SparkFunOTOS.Pose2D> failedAttempts = new ArrayList<>();
     public static Size morphologicalKernel = new Size(3, 3),
@@ -138,6 +140,8 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
             tty.add(Math.atan2(target.y, 1));
 
         }
+        Point bb1 = new Point(0, 0), bb2 = new Point(0, 0);
+        double maxCnt = -1;
         for(int i = 1; i < noSamples; i++) {
             if (stats.get(i, Imgproc.CC_STAT_AREA)[0] < SizeTreshold) continue;
 
@@ -148,14 +152,25 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
                     w = stats.get(i, Imgproc.CC_STAT_WIDTH)[0],
                     h = stats.get(i, Imgproc.CC_STAT_HEIGHT)[0];
 
+            Point target = new Point(x + w/2.d, y + h/2.d);
+            Point b1 = new Point(x, y);
+            Point b2 = new Point(x + w, y + h);
+            Imgproc.circle(input, target, radius, new Scalar(0, 0, 255));
+
             Imgproc.putText(input, Integer.toString(i), new Point(x, y - 10), Imgproc.FONT_HERSHEY_SIMPLEX, 0.2, new Scalar(255, 255, 255), 1);
             Scalar rectColor = new Scalar(255, 0, 0);
-            if (stats.get(i, Imgproc.CC_STAT_AREA)[0] < largestContour) {
-                rectColor = new Scalar(0, 255, 0);
+
+            if (stats.get(i, Imgproc.CC_STAT_AREA)[0] > maxCnt) {
+                bb1 = b1;
+                bb2 = b2;
+                maxCnt = stats.get(i, Imgproc.CC_STAT_AREA)[0];
+//                rectColor = new Scalar(0, 255, 0);
             }
             //bounding box
             Imgproc.rectangle(input, new Point(x, y), new Point(x + w, y + h), rectColor, 2);
         }
+        Imgproc.rectangle(input, bb1, bb2, new Scalar(0, 255, 0), 2);
+
         tx = ttx;
         ty = tty;
         mask.release();
