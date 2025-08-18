@@ -45,6 +45,9 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
     public static Scalar lowerYellow = new Scalar(15, 165, 130), higherYellow = new Scalar(30, 255, 255);
     public static final double cameraFOV = 78;
 
+    public static double cameraFOV_Ydegree = 51.8;
+    public static double cameraFOV_Xdegree = 66;
+
     // daca nu recunoaste pachuri de sample uri posibil ca sunt prea mici, mareste treshold ul
     // sau fa-l mai mic daca ia in calcul noise ul din background
     public static double SizeTreshold = 200;
@@ -80,8 +83,8 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
         // Daca tot nu merge schimva fov urile sa fie cele bune (cauta pe net)
         //double cameraFOV_Y = Math.sqrt(2 * input.rows() * (1 - Math.cos(cameraFOV)) / (input.rows() * input.rows() + input.cols() * input.cols()));
         //double cameraFOV_X = Math.sqrt(2 * input.cols() * (1 - Math.cos(cameraFOV)) / (input.rows() * input.rows() + input.cols() * input.cols()));
-        double cameraFOV_Y = Math.toRadians(51.8);
-        double cameraFOV_X = Math.toRadians(66);
+        double cameraFOV_Y = Math.toRadians(cameraFOV_Ydegree);
+        double cameraFOV_X = Math.toRadians(cameraFOV_Xdegree);
 
 
         Imgproc.cvtColor(input, mask, Imgproc.COLOR_RGB2HSV);
