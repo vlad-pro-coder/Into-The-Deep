@@ -13,8 +13,11 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.PinPoint;
+import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -52,7 +55,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
     // sau fa-l mai mic daca ia in calcul noise ul din background
     public static double SizeTreshold = 200;
     private Mat mask = new Mat(), tmp = new Mat(),
-            labels = new Mat(), stats = new Mat(), centroids = new Mat();
+            labels = new Mat(), stats = new Mat(), centroids = new Mat(), undistorted = new Mat();
 
     private static Point getMiddleTargetPoint(Mat stat, int i){
         double xM = (stat.get(i, Imgproc.CC_STAT_LEFT)[0] + stat.get(i, Imgproc.CC_STAT_WIDTH)[0]) / 2.d;
@@ -70,6 +73,13 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
     private List<Double> tx, ty;
     private int biggestDetectionID = 0;
     public boolean newResultsReady = false;
+    private static final Mat distCoeff = new MatOfDouble(0.1208, -0.261599, 0, 0, 0.10308, 0, 0, 0), cameraMat = Mat.eye(3, 3, CvType.CV_64F);
+    static{
+        cameraMat.put(0, 0, 622.001f);
+        cameraMat.put(1, 1, 622.001f);
+        cameraMat.put(0, 2, 319.803f);
+        cameraMat.put(1, 2, 241.251f);
+    }
 
     @Override
     public Mat processFrame(Mat input) {
@@ -77,6 +87,10 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
             tx = new ArrayList<>();
             ty = new ArrayList<>();
         }
+
+        Calib3d.undistort(input, undistorted, cameraMat, distCoeff);
+        input = undistorted.clone();
+        undistorted.release();
 
         double largestContour = -1;
 
