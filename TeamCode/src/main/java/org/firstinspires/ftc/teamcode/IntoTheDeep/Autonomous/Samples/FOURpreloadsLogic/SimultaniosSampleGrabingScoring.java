@@ -155,7 +155,7 @@ public class SimultaniosSampleGrabingScoring {
 
                         boolean r = (System.currentTimeMillis() - track) >= wait;
                         if (r) track = -1;
-                        return (Intake.HasMixedTeamPiece() && Intake.SampleReachedTrapDoor()) || r;
+                        return (Intake.HasMixedTeamPiece()) || r;
                     }
                 })
                 .addTask(new Task() {
@@ -168,7 +168,7 @@ public class SimultaniosSampleGrabingScoring {
 
                     @Override
                     protected boolean Conditions() {
-                        return Lift.getPosition() < 30;
+                        return Lift.state != Lift.LIFTSTATES.RETRACTING;
                     }
                 })
                 .addTask(new Task() {
@@ -191,7 +191,7 @@ public class SimultaniosSampleGrabingScoring {
 
                     @Override
                     protected boolean Conditions() {
-                        return Extendo.getPosition() < 30;
+                        return Extendo.state != Extendo.ExtendoStates.RETRACTING;
                     }
                 });
     }

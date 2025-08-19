@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.AsymmetricMotionProfile;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.ServoPlus;
@@ -23,9 +25,32 @@ public class Outtake {
     public static double OverHeadTakeSampPos = 348,OverHeadOverBasketPos = 90, OverHeadTakeSpecPos = 0,
             OverHeadScoreSpecPos = 0,OverHeadBasketMovingSafePos = 180;
     private static double tmp = 0;
+
+    public static double OverBasketFreq = 20;
+    public static ElapsedTime timeBeforeLastOverheadUpdate = new ElapsedTime(),
+                                timeBeforeLastExtensionUpdate = new ElapsedTime();
     static {
-        armProfile = new AsymmetricMotionProfile(9000, 2200, 1900);
+        armProfile = new AsymmetricMotionProfile(9000, 2200, 1850);
         ExtensionProfile = new AsymmetricMotionProfile(400, 100000, 100000);
+    }
+
+    public static void OverheadMoveWhenOverBasket(double val){
+        if(timeBeforeLastOverheadUpdate.seconds() > 1.0/OverBasketFreq) {
+            double new_angle = Math.max(0, Math.min(armProfile.getPosition() + val, 355));
+            setOverHeadPos(new_angle);
+            timeBeforeLastOverheadUpdate.reset();
+        }
+    }
+
+    public static void ExtensionMoveWhenOverBasket(double val){
+        double multiplier = 0.005;
+        if(timeBeforeLastExtensionUpdate.seconds() > 1.0/OverBasketFreq) {
+            val *= multiplier;
+            double now_procentage = (retractPos - ExtensionProfile.getTargetPosition()) / (retractPos - extendoPos);
+            now_procentage = Math.max(0, Math.min(now_procentage + val, 1));
+            setExtensionPos(now_procentage);
+            timeBeforeLastOverheadUpdate.reset();
+        }
     }
 
     public static void closeClawTight(){

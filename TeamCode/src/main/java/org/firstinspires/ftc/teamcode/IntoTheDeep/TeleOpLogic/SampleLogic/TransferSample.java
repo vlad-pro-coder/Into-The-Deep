@@ -21,7 +21,7 @@ public class TransferSample {
                         Intake.RotateToStore();
                         Intake.DropUp();
                         Lift.state = Lift.LIFTSTATES.FREEWILL;
-                        Lift.setLiftPos(50);
+                        Lift.setLiftPos(30);
                     }
 
                     @Override
@@ -51,7 +51,7 @@ public class TransferSample {
 
                     @Override
                     protected boolean Conditions() {
-                        return Extendo.getPosition() < 20 && Extendo.state != Extendo.ExtendoStates.RETRACTING;
+                        return Extendo.state != Extendo.ExtendoStates.RETRACTING;
                     }
                 })
                 .addTask(new Task() {
@@ -62,7 +62,7 @@ public class TransferSample {
 
                     @Override
                     protected boolean Conditions() {
-                        return Lift.getPosition() < 20 && Lift.state != Lift.LIFTSTATES.RETRACTING;
+                        return Lift.state != Lift.LIFTSTATES.RETRACTING;
                     }
                 })
                 .addTask(new Task() {

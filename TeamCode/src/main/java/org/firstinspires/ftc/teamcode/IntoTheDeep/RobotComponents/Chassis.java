@@ -26,7 +26,7 @@ public class Chassis {
             Heading = new PIDController(1.1,0,0.06);
     public static PIDCoefficients SmallHeading = new PIDCoefficients(1.8,0,0.07),
                                     NormalHeading = new PIDCoefficients(1.1,0,0.06),
-                                    ToSubermsibleHeading = new PIDCoefficients(0.65,0,0.4);
+                                    ToSubermsibleHeading = new PIDCoefficients(0.8,0,0.06);
 
 
     static{

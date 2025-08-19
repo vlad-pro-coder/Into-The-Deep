@@ -50,6 +50,12 @@ public class TeleopsStarter {
         return sgn * h;
     }
 
+    public void InitUpdate(){
+        RobotInitializers.clearCache();
+        Localizer.Update();
+        Outtake.update();
+    }
+
     public void update(){
         RobotInitializers.clearCache();
 
@@ -77,6 +83,8 @@ public class TeleopsStarter {
                 (reverse ? 1 : -1) * getPowerSigned(gm1.left_stick_y, 3) * tSpeed,
                 getPowerSigned(gm1.right_trigger - gm1.left_trigger, 3) * tSpeed * pow * rot
         );
+
+        RobotInitializers.Dashtelemetry.addData("gamepad2 right stick y",-gm2.right_stick_y);
 
         //Chassis.update();
         Extendo.update();

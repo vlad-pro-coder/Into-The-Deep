@@ -128,7 +128,7 @@ public class MainHandler {
                         }
                         break;
                     case SAMPLEBASKET:
-                        if(currentTasks.IsSchedulerDone()) {
+                        if(true) {
                             if(gm1.dpad_up != prev1.dpad_up && gm1.dpad_up) {
                                 currentTasks.AddAnotherScheduler(HighBasketScoreActions());
                                 DidLiftSampleUp = true;
@@ -136,6 +136,12 @@ public class MainHandler {
                             if(gm1.dpad_down != prev1.dpad_down && gm1.dpad_down) {
                                 currentTasks.AddAnotherScheduler(LowBasketScoreActions());
                                 DidLiftSampleUp = true;
+                            }
+                            if(currentTasks.IsSchedulerDone() && DidLiftSampleUp){
+                                Outtake.ExtensionMoveWhenOverBasket(Math.abs(gm2.right_stick_y) < 0.05 ? 0:-gm2.right_stick_y);
+                                int left_bumper = gm2.left_bumper ? 1 : 0;
+                                int right_bumper = gm2.right_bumper ? 1 : 0;
+                                Outtake.OverheadMoveWhenOverBasket(right_bumper - left_bumper);
                             }
                             if(gm1.cross != prev1.cross && gm1.cross && DidLiftSampleUp && currentTasks.IsSchedulerDone() && TightGripOfClaw) {
                                 Outtake.closeClawTightTeleop();

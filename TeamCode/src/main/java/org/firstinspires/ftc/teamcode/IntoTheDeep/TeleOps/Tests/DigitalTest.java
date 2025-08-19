@@ -27,7 +27,7 @@ public class DigitalTest extends LinearOpMode {
 
         while(opModeIsActive()){
             RobotInitializers.clearCache();
-            lm = new LimitSwitch(ExpansionHubDigital,port);
+            lm = new LimitSwitch(ControlHubDigital,port);
             RobotInitializers.Dashtelemetry.addData("state", lm.getState());
         }
     }

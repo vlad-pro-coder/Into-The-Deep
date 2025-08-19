@@ -52,8 +52,7 @@ public class Colors {
         double yellowDist = Math.min(getColorDistance(input, ColorType.YELLOW2.getColor()), yellowDist1);
         if(redDist < blueDist && redDist < yellowDist) return ColorType.RED;
         if(blueDist < redDist && blueDist < yellowDist) return ColorType.BLUE;
-        if(yellowDist < redDist && yellowDist < blueDist) return ColorType.YELLOW;
-        return ColorType.NONE;
+        return ColorType.YELLOW;
     }
 
 }

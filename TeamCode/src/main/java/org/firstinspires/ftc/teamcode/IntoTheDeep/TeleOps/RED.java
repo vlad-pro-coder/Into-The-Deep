@@ -20,6 +20,10 @@ public class RED extends LinearOpMode {
         Lift.DoingAuto = false;
         Extendo.DoingAuto = false;
 
+        while(opModeInInit()){
+            opmode.InitUpdate();
+        }
+
         waitForStart();
         RobotInitializers.enable();
 

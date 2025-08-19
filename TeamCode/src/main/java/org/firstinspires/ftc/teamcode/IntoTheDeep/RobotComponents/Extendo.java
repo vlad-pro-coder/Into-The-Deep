@@ -130,7 +130,7 @@ public class Extendo {
                     double distanceInMM = Localizer.getDistanceFromTwoPoints(chosenpos,Localizer.getCurrentPosition());
                     setExtendoPos(MMToEncoderTicks(distanceInMM));
                 }
-                if(getPosition() < 100)
+                if(getPosition() < 75)
                     Intake.DropUp();
                 else
                     Intake.DropDown();

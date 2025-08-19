@@ -244,7 +244,7 @@ public class RobotInitializers {
         Outtake.armProfile.setInstant(OverHeadTakeSampPos-1);
         Outtake.OverHead_TAKESAMPLE();
         Outtake.setExtensionPos(0);
-        Outtake.openClaw();
+        Outtake.closeClaw();
         Intake.DropUp();
         Intake.Unblock();
     }

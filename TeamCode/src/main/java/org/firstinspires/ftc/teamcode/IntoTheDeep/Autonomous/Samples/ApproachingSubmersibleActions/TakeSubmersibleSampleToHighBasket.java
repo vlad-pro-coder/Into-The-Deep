@@ -59,7 +59,7 @@ public class TakeSubmersibleSampleToHighBasket {
 
                     @Override
                     protected boolean Conditions() {
-                        return Extendo.getPosition() < 30;
+                        return Extendo.state != Extendo.ExtendoStates.RETRACTING;
                     }
                 })
                 .addTask(new Task() {
@@ -170,7 +170,7 @@ public class TakeSubmersibleSampleToHighBasket {
 
                     @Override
                     protected boolean Conditions() {
-                        return Lift.getPosition() < 30;
+                        return Lift.state != Lift.LIFTSTATES.RETRACTING;
                     }
                 })
                 .addTask(new Task() {

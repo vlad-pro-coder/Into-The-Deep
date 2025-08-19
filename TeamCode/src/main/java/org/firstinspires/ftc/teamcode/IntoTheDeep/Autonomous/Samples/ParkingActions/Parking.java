@@ -21,8 +21,20 @@ public class Parking {
 
                     @Override
                     protected boolean Conditions() {
+                        return Outtake.OverHeadDoneness(40);
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Outtake.setExtensionPos(0.5);
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
                         return true;
                     }
                 });
+
     }
 }

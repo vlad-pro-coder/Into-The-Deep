@@ -65,6 +65,7 @@ public class Samples extends LinearOpMode {
         PARKING,
     }
     public boolean WereInstructionGiven = false;
+    public boolean Wasparked = false;
     public RobotStates robotstate = RobotStates.OCCUPIEDPRELOADS;
     public ElapsedTime time = new ElapsedTime();
     public static
@@ -168,7 +169,7 @@ public class Samples extends LinearOpMode {
 
                 case GRABFROMSUBMERSIBLE:
                     if(!WereInstructionGiven){
-                        tasks.AddAnotherScheduler(TakeCachedSampleActions(besttxty,0.7));
+                        tasks.AddAnotherScheduler(TakeCachedSampleActions(besttxty,0.4));
                         WereInstructionGiven = true;
                     }
                     if(Intake.HasWrongTeamPiece() && !Intake.isStorageEmpty())
@@ -182,7 +183,8 @@ public class Samples extends LinearOpMode {
                         RobotLog.ii("reached trapdoor", "" + Intake.SampleReachedTrapDoor());
 
                         if(Intake.HasMixedTeamPiece()) {//change in color
-                            robotstate = RobotStates.SUBMERSIBLESAMPLECYCLE;
+                            if(30 - time.seconds() > 2.5)
+                                robotstate = RobotStates.SUBMERSIBLESAMPLECYCLE;
                             RobotLog.ii("accepted","");
                         }
                         else {
@@ -190,10 +192,6 @@ public class Samples extends LinearOpMode {
                             RobotLog.ii("rejected","");
                         }
                         WereInstructionGiven = false;
-                    }
-                    if(30 - time.seconds() <= 2.5) {
-                        Parkingtasks.AddAnotherScheduler(ParkingActions());
-                        robotstate = RobotStates.PARKING;
                     }
                     break;
                 case FAILEDDETECTION:
@@ -230,6 +228,10 @@ public class Samples extends LinearOpMode {
             RobotInitializers.Dashtelemetry.addData("vel y",Localizer.getVelocity().y);
             RobotInitializers.Dashtelemetry.addData("vel h",Localizer.getVelocity().h);
 
+            if(30 - time.seconds() <= 2.5 && robotstate != RobotStates.SUBMERSIBLESAMPLECYCLE && !Wasparked) {
+                Parkingtasks.AddAnotherScheduler(ParkingActions());
+                Wasparked = true;
+            }
 
             Chassis.update();
             Lift.update();
