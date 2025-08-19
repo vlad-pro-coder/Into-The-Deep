@@ -31,7 +31,7 @@ import kotlin.Pair;
 @Config
 public class YellowSampleDetectionPipeline extends OpenCvPipeline {
     public static SparkFunOTOS.Pose2D poseWhenSnapshoted = new SparkFunOTOS.Pose2D(0,0,0);
-    private static int radius = 10;
+    private static int radius = 2;
     public static boolean showMask = false;
     private ArrayList<SparkFunOTOS.Pose2D> failedAttempts = new ArrayList<>();
     public static Size morphologicalKernel = new Size(3, 3),
@@ -80,12 +80,8 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
 
         double largestContour = -1;
 
-        // Daca tot nu merge schimva fov urile sa fie cele bune (cauta pe net)
-        //double cameraFOV_Y = Math.sqrt(2 * input.rows() * (1 - Math.cos(cameraFOV)) / (input.rows() * input.rows() + input.cols() * input.cols()));
-        //double cameraFOV_X = Math.sqrt(2 * input.cols() * (1 - Math.cos(cameraFOV)) / (input.rows() * input.rows() + input.cols() * input.cols()));
         double cameraFOV_Y = Math.toRadians(cameraFOV_Ydegree);
         double cameraFOV_X = Math.toRadians(cameraFOV_Xdegree);
-
 
         Imgproc.cvtColor(input, mask, Imgproc.COLOR_RGB2HSV);
 
@@ -100,17 +96,16 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
 
         int noSamples = Imgproc.connectedComponentsWithStats(mask, labels, stats, centroids, 8);
 
-        // make virtual plane at distance 1 from focal point and compute its with and height
-        double vpw = 2.d * Math.tan(cameraFOV_X / 2.d);
-        double vph = 2.d * Math.tan(cameraFOV_Y / 2.d);
+        double focalX = (input.cols() / 2.0) / Math.tan(Math.toRadians(cameraFOV_Xdegree) / 2.0);
+        double focalY = (input.rows() / 2.0) / Math.tan(Math.toRadians(cameraFOV_Ydegree) / 2.0);
+        double cx = input.cols() / 2.d;
+        double cy = input.rows() / 2.d;
 
         if(showMask){
             input = mask.clone();
         }
 
         // initialize empty list for tx and ty
-//        tx = new double[noSamples];
-//        ty = new double[noSamples];
         List<Double> ttx = new ArrayList<>(noSamples);
         List<Double> tty = new ArrayList<>(noSamples);
 
@@ -130,17 +125,12 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
 
             Point target = new Point(x + w/2.d, y + h/2.d);
 
-            // convert from top-left (0, 0) to middle of the image (0, 0)
-            double nx = (target.x - input.cols() / 2.d - 0.5d) * 2.d / input.cols(),
-                    ny = (input.rows() / 2.d - 0.5d - target.y) * 2.d / input.rows();
-
-
-            // convert from pixel distance to virtual plane coordonates
-            target = new Point(vpw / 2.d * nx, vph / 2.d * ny);
+            double dx = (target.x - cx) / focalX;
+            double dy = (target.y - cy) / focalY;
 
             // get the angle
-            ttx.add(Math.atan2(target.x, 1));
-            tty.add(Math.atan2(target.y, 1));
+            ttx.add(Math.atan(dx));
+            tty.add(Math.atan(dy));
 
         }
         Point bb1 = new Point(0, 0), bb2 = new Point(0, 0);
@@ -167,7 +157,6 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
                 bb1 = b1;
                 bb2 = b2;
                 maxCnt = stats.get(i, Imgproc.CC_STAT_AREA)[0];
-//                rectColor = new Scalar(0, 255, 0);
             }
             //bounding box
             Imgproc.rectangle(input, new Point(x, y), new Point(x + w, y + h), rectColor, 2);
