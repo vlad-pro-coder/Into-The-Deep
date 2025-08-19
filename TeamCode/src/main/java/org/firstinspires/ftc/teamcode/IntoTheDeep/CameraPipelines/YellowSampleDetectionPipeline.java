@@ -73,13 +73,6 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
     private List<Double> tx, ty;
     private int biggestDetectionID = 0;
     public boolean newResultsReady = false;
-    private static final Mat distCoeff = new MatOfDouble(0.1208, -0.261599, 0, 0, 0.10308, 0, 0, 0), cameraMat = Mat.eye(3, 3, CvType.CV_64F);
-    static{
-        cameraMat.put(0, 0, 622.001f);
-        cameraMat.put(1, 1, 622.001f);
-        cameraMat.put(0, 2, 319.803f);
-        cameraMat.put(1, 2, 241.251f);
-    }
 
     @Override
     public Mat processFrame(Mat input) {
@@ -87,10 +80,6 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
             tx = new ArrayList<>();
             ty = new ArrayList<>();
         }
-
-        Calib3d.undistort(input, undistorted, cameraMat, distCoeff);
-        input = undistorted.clone();
-        undistorted.release();
 
         double largestContour = -1;
 
@@ -110,10 +99,10 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
 
         int noSamples = Imgproc.connectedComponentsWithStats(mask, labels, stats, centroids, 8);
 
-        double focalX = (input.cols() / 2.0) / Math.tan(Math.toRadians(cameraFOV_Xdegree) / 2.0);
-        double focalY = (input.rows() / 2.0) / Math.tan(Math.toRadians(cameraFOV_Ydegree) / 2.0);
-        double cx = input.cols() / 2.d;
-        double cy = input.rows() / 2.d;
+        double focalX = 622.001;
+        double focalY = 622.001;
+        double cx = 319.803d;
+        double cy = 241.251d;
 
         if(showMask){
             input = mask.clone();
