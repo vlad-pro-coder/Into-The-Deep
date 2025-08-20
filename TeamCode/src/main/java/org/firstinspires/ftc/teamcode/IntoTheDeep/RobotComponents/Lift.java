@@ -22,7 +22,7 @@ public class Lift {
     public static double MaxLowBasketPos = 350;
     public static CachedMotor motor1,motor2,encoder;
     public static double LowBasketPos = 300,HighBasketPos = 800;
-    private static double currentPos = 0;
+    public static double currentPos = 0;
     private static double PowerToMotors = 0;
     public static LimitSwitch lm;
     public static PIDController pidController = new PIDController(0.0065,0.0003,0.0003);
@@ -89,7 +89,7 @@ public class Lift {
                 setLiftPower(-1);
                 boolean ShouldReset;
                 try {
-                    ShouldReset = lm.getState() || (Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40);
+                    ShouldReset = lm.getState();
                 } catch (Exception e) {
                     ShouldReset = motor1.getCurrent(CurrentUnit.AMPS) >= 4 && motor2.getCurrent(CurrentUnit.AMPS) >= 4  && Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40;
                     Dashtelemetry.addData("lift limit switch not operational", "");
@@ -105,24 +105,24 @@ public class Lift {
                 break;
             case LOWBASKET:
                 setLiftPower(pidController.calculatePower(getPosition()) + LinearFunction.getOutput(powerDown,powerUp,intervalStart,intervalEnd,getPosition()));
-                if(-gm2.left_stick_y > 0.05 && currentPos + -gm2.left_stick_y <= MaxLowBasketPos){
-                    currentPos += -gm2.left_stick_y;
-                    setLiftPos(currentPos);
+                if(-gm2.left_stick_y > 0.05 && LowBasketPos + currentPos + -gm2.left_stick_y <= MaxLowBasketPos){
+                    currentPos += -gm2.left_stick_y * 3;
+                    setLiftPos(LowBasketPos + currentPos);
                 }
-                else if(-gm2.left_stick_y < -0.05 && currentPos - -gm2.left_stick_y >= LowBasketPos){
-                    currentPos -= -gm2.left_stick_y;
-                    setLiftPos(currentPos);
+                else if(-gm2.left_stick_y < -0.05 && LowBasketPos + currentPos - -gm2.left_stick_y >= LowBasketPos){
+                    currentPos -= -gm2.left_stick_y * 3;
+                    setLiftPos(LowBasketPos + currentPos);
                 }
                 break;
             case HIGHBASKET:
                 setLiftPower(pidController.calculatePower(getPosition()) + LinearFunction.getOutput(powerDown,powerUp,intervalStart,intervalEnd,getPosition()));
-                if(-gm2.left_stick_y > 0.05 && currentPos + -gm2.left_stick_y <= MaxHighBasketPos){
-                    currentPos += -gm2.left_stick_y;
-                    setLiftPos(currentPos);
+                if(-gm2.left_stick_y > 0.05 && HighBasketPos + currentPos + -gm2.left_stick_y <= MaxHighBasketPos){
+                    currentPos += -gm2.left_stick_y * 3;
+                    setLiftPos(HighBasketPos + currentPos);
                 }
-                else if(-gm2.left_stick_y < -0.05 && currentPos - -gm2.left_stick_y >= HighBasketPos){
-                    currentPos -= -gm2.left_stick_y;
-                    setLiftPos(currentPos);
+                else if(-gm2.left_stick_y < -0.05 && HighBasketPos + currentPos - -gm2.left_stick_y >= HighBasketPos){
+                    currentPos -= -gm2.left_stick_y * 3;
+                    setLiftPos(HighBasketPos + currentPos);
                 }
                 break;
         }

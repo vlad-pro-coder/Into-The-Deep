@@ -26,7 +26,7 @@ public class RangeSensor extends Rev2mDistanceSensor implements HardwareDevice{
     public RangeSensor(I2cDeviceSynch deviceClient, boolean deviceClientIsOwned) {
         super(deviceClient, deviceClientIsOwned);
         this.timePassed = System.currentTimeMillis();
-        freq = 20;
+        freq = 50;
     }
 
     public void changeFrequency(double freq){

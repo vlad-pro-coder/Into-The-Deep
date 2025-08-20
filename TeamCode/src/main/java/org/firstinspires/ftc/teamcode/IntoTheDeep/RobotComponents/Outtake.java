@@ -43,13 +43,13 @@ public class Outtake {
     }
 
     public static void ExtensionMoveWhenOverBasket(double val){
-        double multiplier = 0.005;
+        double multiplier = 0.015;
         if(timeBeforeLastExtensionUpdate.seconds() > 1.0/OverBasketFreq) {
             val *= multiplier;
             double now_procentage = (retractPos - ExtensionProfile.getTargetPosition()) / (retractPos - extendoPos);
             now_procentage = Math.max(0, Math.min(now_procentage + val, 1));
             setExtensionPos(now_procentage);
-            timeBeforeLastOverheadUpdate.reset();
+            timeBeforeLastExtensionUpdate.reset();
         }
     }
 

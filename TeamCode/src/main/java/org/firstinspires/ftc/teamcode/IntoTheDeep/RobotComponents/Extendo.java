@@ -95,7 +95,7 @@ public class Extendo {
                 motor.setPower(-1);
                 boolean ShouldReset;
                 try {
-                    ShouldReset = lm.getState() || (Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40);
+                    ShouldReset = lm.getState();
                 } catch (Exception e) {
                     ShouldReset = motor.getCurrent(CurrentUnit.AMPS) >= 4 && Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40;
                     Dashtelemetry.addData("lift limit switch not operational", "");

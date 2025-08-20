@@ -29,7 +29,6 @@ public class TransferSample {
                         return Intake.SampleReachedTrapDoor();
                     }
                 })
-                .waitSeconds(0.1)
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
@@ -76,7 +75,6 @@ public class TransferSample {
                         return true;
                     }
                 })
-                .waitSeconds(0.15)
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
@@ -89,7 +87,6 @@ public class TransferSample {
                         return Outtake.OverHeadDoneness();
                     }
                 })
-                .waitSeconds(0.1)
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {

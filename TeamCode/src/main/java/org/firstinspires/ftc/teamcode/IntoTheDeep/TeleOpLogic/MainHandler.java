@@ -19,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Scheduler;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Lift;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 
@@ -60,7 +61,7 @@ public class MainHandler {
 
         if(gm1.left_bumper){
             //eject
-            Intake.RotateToEject();
+            Intake.RotateToEject(0.6);
             Intake.Unblock();
         }
         else if(gm1.right_bumper) {
@@ -122,7 +123,7 @@ public class MainHandler {
                     case SAMPLETRANSFER:
                         if(gm1.square != prev1.square && gm1.square)
                             currentTasks.clear();
-                        if(currentTasks.IsSchedulerDone() && (Intake.HasMixedTeamPiece() || (gm1.square != prev1.square && gm1.square))) {//change
+                        if(currentTasks.IsSchedulerDone() && (Intake.HasMixedTeamPiece() || gm1.square)) {//change
                             currentTasks.AddAnotherScheduler(TransferSampleActions());
                             CurrentState = ActionStates.SAMPLEBASKET;
                         }
@@ -131,10 +132,12 @@ public class MainHandler {
                         if(true) {
                             if(gm1.dpad_up != prev1.dpad_up && gm1.dpad_up) {
                                 currentTasks.AddAnotherScheduler(HighBasketScoreActions());
+                                Lift.currentPos = 0;
                                 DidLiftSampleUp = true;
                             }
                             if(gm1.dpad_down != prev1.dpad_down && gm1.dpad_down) {
                                 currentTasks.AddAnotherScheduler(LowBasketScoreActions());
+                                Lift.currentPos = 0;
                                 DidLiftSampleUp = true;
                             }
                             if(currentTasks.IsSchedulerDone() && DidLiftSampleUp){
