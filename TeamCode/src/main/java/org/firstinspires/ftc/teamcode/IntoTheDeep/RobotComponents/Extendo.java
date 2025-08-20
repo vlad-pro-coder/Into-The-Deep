@@ -32,7 +32,7 @@ public class Extendo {
     public static PIDController pidController = new PIDController(0.0075, 0, 0.0002),
                                 pidBalancing = new PIDController(-0.13,0,0);
     public static LimitSwitch lm;
-    public static final int MaxExtension = 880;
+    public static final int MaxExtension = 910;
     public static ExtendoStates state = ExtendoStates.RETRACTING;
     public static boolean DoingAuto = false;
     private static boolean wasHoldPosOnce = false;
@@ -95,7 +95,7 @@ public class Extendo {
                 motor.setPower(-1);
                 boolean ShouldReset;
                 try {
-                    ShouldReset = lm.getState();
+                    ShouldReset = lm.getState() || (Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40);
                 } catch (Exception e) {
                     ShouldReset = motor.getCurrent(CurrentUnit.AMPS) >= 4 && Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40;
                     Dashtelemetry.addData("lift limit switch not operational", "");

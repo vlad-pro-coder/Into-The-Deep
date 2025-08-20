@@ -27,7 +27,7 @@ public class Parking {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        Outtake.setExtensionPos(0.5);
+                        Outtake.setExtensionPos(1);
                     }
 
                     @Override

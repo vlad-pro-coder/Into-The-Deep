@@ -42,7 +42,7 @@ public class RGBsensor extends RevColorSensorV3 implements HardwareDevice {
         changeLEDsettings(LEDPulseModulation.LED_PULSE_100kHz, LEDCurrent.CURRENT_5mA);
         timeDistance = System.currentTimeMillis();
         timeRGB = System.currentTimeMillis();
-        setFreqToUpdate(20);
+        setFreqToUpdate(50);
     }
     public void changeLEDsettings(LEDPulseModulation l, LEDCurrent c){
         setLEDParameters(l, c);

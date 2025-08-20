@@ -50,7 +50,7 @@ public class TakeSubmersibleSampleToHighBasket {
                         return true;
                     }
                 })
-                .waitSeconds(0.1)
+                .waitSeconds(0.05)
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
@@ -65,7 +65,7 @@ public class TakeSubmersibleSampleToHighBasket {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        Lift.CustomPowerToMotors(-0.5);
+                        Lift.CustomPowerToMotors(-0.6);
                         Outtake.setExtensionPos(EXTENSION_readytakesample);
                     }
 
@@ -106,12 +106,12 @@ public class TakeSubmersibleSampleToHighBasket {
                         Extendo.state = Extendo.ExtendoStates.BALANCEFROMPOINT;
                         Lift.state = Lift.LIFTSTATES.FREEWILL;
                         Lift.setLiftPos(LIFT_high);
-                        Outtake.setExtensionPos(EXTENSION_overbasket);
+                        Outtake.setExtensionPos(EXTENSION_readytakesample);
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Lift.IsLiftDone(300) && Outtake.OverHeadDoneness() && Outtake.ExtensionDoneness() && Chassis.IsHeadingDone(5) && Chassis.IsPositionDone(80) && Localizer.getVelocity().h < Math.toRadians(5) && Localizer.getVelocity().x < 70 && Localizer.getVelocity().y < 70;
+                        return Lift.IsLiftDone(300) && Outtake.OverHeadDoneness() && Outtake.ExtensionDoneness() && Chassis.IsHeadingDone(5) && Chassis.IsPositionDone(100) && Localizer.getVelocity().x < 200 && Localizer.getVelocity().y < 200;
                     }
                 })
                 .addTask(new Task() {
@@ -127,17 +127,18 @@ public class TakeSubmersibleSampleToHighBasket {
                         return Outtake.IsClawDone();
                     }
                 })
-                .addTask(new Task() {
+                /*.addTask(new Task() {
                     @Override
                     protected void Actions() {
                         Chassis.Heading.setPidCoefficients(Chassis.ToSubermsibleHeading);
+                        Chassis.Heading.setTargetPosition(Chassis.getTargetPosition().h);
                     }
 
                     @Override
                     protected boolean Conditions() {
                         return true;
                     }
-                })
+                })*/
                 .StartPurePersuit(PUREPERSUIT_pathtosubmersible, HEADING_infrontofsubmersible, PUREPERSUIT_radius)
                 .addTask(new Task() {
                     @Override
@@ -162,6 +163,7 @@ public class TakeSubmersibleSampleToHighBasket {
                         return Outtake.IsClawDone();
                     }
                 })
+                .waitSeconds(0.05)
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {

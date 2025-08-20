@@ -25,9 +25,6 @@ public class TuneMotionProfile extends LinearOpMode {
                 Outtake.setExtensionPos(pos);
                 lastpos = pos;
             }
-            Outtake.ExtensionProfile.acceleration = a;
-            Outtake.ExtensionProfile.deceleration = d;
-            Outtake.ExtensionProfile.maxVelocity = v;
 
             Outtake.ExtensionProfile.update();
             Outtake.Extension.setAngle(Outtake.ExtensionProfile.getPosition());

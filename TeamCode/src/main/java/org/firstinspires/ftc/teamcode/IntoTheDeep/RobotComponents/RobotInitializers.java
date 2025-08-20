@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents;
 
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.AutoConstants.OVERHEAD_startingpos;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake.OverHeadTakeSampPos;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -238,11 +239,22 @@ public class RobotInitializers {
         PtoAndWheelie.PTO = new ServoPlus(ServoHub, 5, Servo.Direction.FORWARD);
     }
 
-    public static void InitializeForOperation(){
+    public static void InitializeForOperationTeleop(){
         Lift.state = Lift.LIFTSTATES.RETRACTING;
         Extendo.state = Extendo.ExtendoStates.RETRACTING;
         Outtake.armProfile.setInstant(OverHeadTakeSampPos-1);
         Outtake.OverHead_TAKESAMPLE();
+        Outtake.setExtensionPos(0);
+        Outtake.closeClaw();
+        Intake.DropUp();
+        Intake.Unblock();
+    }
+
+    public static void InitializeForOperationAuto(){
+        Lift.state = Lift.LIFTSTATES.RETRACTING;
+        Extendo.state = Extendo.ExtendoStates.RETRACTING;
+        Outtake.armProfile.setInstant(OVERHEAD_startingpos-1);
+        Outtake.setOverHeadPos(OVERHEAD_startingpos);
         Outtake.setExtensionPos(0);
         Outtake.closeClaw();
         Intake.DropUp();

@@ -48,7 +48,7 @@ public class TestScheduler extends LinearOpMode {
                 return Outtake.OverHeadDoneness();
             }
         });
-        RobotInitializers.InitializeForOperation();
+        RobotInitializers.InitializeForOperationTeleop();
 
         while(opModeInInit()){
             Lift.update();

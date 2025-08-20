@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 
 @Config
 public class GetSamplePosition {
-    public static double spool = 17.883,RA=4.2619161106;
+    public static double spool = 16,RA=4.75;
     public static int CPR = 28;
     public static double ExtendoToDistance(int e){
         return (2.0*Math.PI*spool/RA) * ((double)e/CPR);

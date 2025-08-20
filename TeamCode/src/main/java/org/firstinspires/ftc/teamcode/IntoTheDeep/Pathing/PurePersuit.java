@@ -64,6 +64,11 @@ public class PurePersuit {
         this.LastLineHeading = TargetHeading;
     }
 
+    /*public SparkFunOTOS.Pose2D getTargetPosition(){
+        Point end = Path.get(Path.size()-1).pend;
+        return new SparkFunOTOS.Pose2D(end.x, end.y, 0);
+    }*/
+
     public boolean TrajectoryDone(double errorDistance){
         double in_front_still_distance = 0;
         for(int i=indLine+1;i<Path.size();i++)

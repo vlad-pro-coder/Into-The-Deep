@@ -16,8 +16,12 @@ public class PtoAndWheelie {
 
     public static double LiftingRobotWheeliePosW1 = 320, IdleRobotWheeliePosW1 = 190;
     public static double LiftingRobotWheeliePosW2 = 70, IdleRobotWheeliePosW2 = 200;
-    public static double EngagePTO = 180, DisengagePTO = 280;
-    public static PIDController EngagedLift= new PIDController(0.04, 0, 0);
+    public static double EngagePTO = 150, DisengagePTO = 280;
+    public static PIDController EngagedLift= new PIDController(0.02, 0, 0);
+
+    static {
+        EngagedLift.setFreq(30);
+    }
 
     public static void setPosChassisDrivenLift(double pos){
         EngagedLift.setTargetPosition(pos);

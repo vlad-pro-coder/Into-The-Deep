@@ -20,7 +20,8 @@ public class TestClimb extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         RobotInitializers.InitializeFull(hardwareMap);
-        RobotInitializers.InitializeForOperation();
+        RobotInitializers.InitializeForOperationTeleop();
+        tasks.clear();
         tasks.AddAnotherScheduler(ClimbActions());
         Extendo.DoingAuto = true;
 

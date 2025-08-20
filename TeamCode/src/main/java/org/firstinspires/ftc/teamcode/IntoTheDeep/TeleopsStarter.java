@@ -34,7 +34,7 @@ public class TeleopsStarter {
         TeleopsStarter.gm1 = gm1;
         TeleopsStarter.gm2 = gm2;
         RobotInitializers.InitializeFull(hardwareMap);
-        RobotInitializers.InitializeForOperation();
+        RobotInitializers.InitializeForOperationTeleop();
         RobotInitializers.disable();
         ActionHandler = new MainHandler();
         team = color;

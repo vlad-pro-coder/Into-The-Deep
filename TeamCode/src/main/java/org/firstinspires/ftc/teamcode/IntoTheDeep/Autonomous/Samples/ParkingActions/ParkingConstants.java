@@ -3,5 +3,5 @@ package org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.ParkingAct
 public class ParkingConstants {
 
     public static final double LIFT_forparking = 120;
-    public static final double OVERHEAD_forparking = 230;
+    public static final double OVERHEAD_forparking = 220;
 }

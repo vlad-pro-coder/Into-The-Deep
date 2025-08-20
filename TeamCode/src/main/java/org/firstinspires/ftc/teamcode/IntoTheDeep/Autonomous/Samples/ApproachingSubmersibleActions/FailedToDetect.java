@@ -16,7 +16,7 @@ public class FailedToDetect {
                     @Override
                     protected void Actions() {
                         Intake.DropUp();
-                        Intake.RotateToEject(0.4);
+                        Intake.RotateToEject(0.6);
                         Extendo.state = Extendo.ExtendoStates.RETRACTING;
                         Intake.Unblock();
                         Chassis.setHeading(HEADING_infrontofsubmersible);
@@ -24,7 +24,7 @@ public class FailedToDetect {
 
                     @Override
                     protected boolean Conditions() {
-                        return Extendo.getPosition() < 30 && Chassis.IsHeadingDone(4) && Localizer.getVelocity().h < Math.toRadians(2);
+                        return Extendo.getPosition() < 30 && Chassis.IsHeadingDone(4) && Localizer.getVelocity().h < Math.toRadians(2) && Intake.isStorageEmpty();
                     }
                 });
     }

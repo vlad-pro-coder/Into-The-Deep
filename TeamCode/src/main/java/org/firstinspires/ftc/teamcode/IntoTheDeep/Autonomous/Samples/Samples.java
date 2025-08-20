@@ -24,6 +24,7 @@ import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.Auto
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.AutoConstants.OVERHEAD_thirdsample;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.AutoConstants.besttxty;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.FOURpreloadsLogic.PutLastSamplePredefined.PutLastSamplePredefinedActions;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.FOURpreloadsLogic.SimultaniosSampleGrabingScoring.FasterPreloadGrabingScoringActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.FOURpreloadsLogic.SimultaniosSampleGrabingScoring.SimultaniosSampleGrabingScoringActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.ParkingActions.Parking.ParkingActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.CameraPipelines.YellowSampleDetectionPipeline.diminuator;
@@ -52,6 +53,8 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializ
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.Logitech920;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.PinPoint;
 
+import java.util.Objects;
+
 @Autonomous
 @Config
 public class Samples extends LinearOpMode {
@@ -73,17 +76,17 @@ public class Samples extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         RobotInitializers.InitializeFull(hardwareMap);
-        /*Localizer.Reset();
+        Localizer.Reset();
         while(Localizer.pinPoint.getDeviceStatus() == PinPoint.DeviceStatus.CALIBRATING) {
             RobotInitializers.Dashtelemetry.addLine("pinpoint reseting");
             RobotLog.ii("pinpoint","" + Localizer.pinPoint.getDeviceStatus());
-        }*/
-        RobotInitializers.InitializeForOperation();
+        }
+        RobotInitializers.InitializeForOperationAuto();
 
         camera  = new Logitech920("logitik",hardwareMap);
         Scheduler tasks = new Scheduler();
         Scheduler Parkingtasks = new Scheduler();
-        tasks.AddAnotherScheduler(SimultaniosSampleGrabingScoringActions(CHASSIS_sample1pos,EXTENDO_sample1,0.7,LIFT_preload,OVERHEAD_preload,EXTENSION_overbasket));
+        tasks.AddAnotherScheduler(FasterPreloadGrabingScoringActions(CHASSIS_sample1pos,EXTENDO_sample1,0.7,LIFT_preload,OVERHEAD_preload,EXTENSION_secondsample));
         tasks.AddAnotherScheduler(SimultaniosSampleGrabingScoringActions(CHASSIS_sample2pos,EXTENDO_sample2,0.7,LIFT_firstsample,OVERHEAD_firstsample,EXTENSION_secondsample));
         tasks.AddAnotherScheduler(SimultaniosSampleGrabingScoringActions(CHASSIS_sample3pos,EXTENDO_sample3,0.7,LIFT_secondsample,OVERHEAD_secondsample,EXTENSION_secondsample));
         tasks.AddAnotherScheduler(PutLastSamplePredefinedActions(LIFT_thirdsample,OVERHEAD_thirdsample,EXTENSION_overbasket));
@@ -93,14 +96,9 @@ public class Samples extends LinearOpMode {
         Extendo.DoingAuto = true;
         //Chassis.setTargetPosition(CHASSIS_turntosubmersibleforcontinuostaking);//to comment
 
-        Outtake.setOverHeadPos(OVERHEAD_idle);
-
 
         while(opModeInInit()){
             RobotInitializers.clearCache();
-
-            Intake.Block();
-            Outtake.openClaw();
 
             Lift.update();
             Extendo.update();
@@ -169,10 +167,10 @@ public class Samples extends LinearOpMode {
 
                 case GRABFROMSUBMERSIBLE:
                     if(!WereInstructionGiven){
-                        tasks.AddAnotherScheduler(TakeCachedSampleActions(besttxty,0.4));
+                        tasks.AddAnotherScheduler(TakeCachedSampleActions(besttxty,0.7));
                         WereInstructionGiven = true;
                     }
-                    if(Intake.HasWrongTeamPiece() && !Intake.isStorageEmpty())
+                    if(!Intake.HasMixedTeamPiece() && !Intake.isStorageEmpty())
                     {
                         tasks.clear();
                         robotstate = RobotStates.FAILEDDETECTION;
@@ -183,7 +181,7 @@ public class Samples extends LinearOpMode {
                         RobotLog.ii("reached trapdoor", "" + Intake.SampleReachedTrapDoor());
 
                         if(Intake.HasMixedTeamPiece()) {//change in color
-                            if(30 - time.seconds() > 2.5)
+                            if(30 - time.seconds() > 1)
                                 robotstate = RobotStates.SUBMERSIBLESAMPLECYCLE;
                             RobotLog.ii("accepted","");
                         }
@@ -228,7 +226,7 @@ public class Samples extends LinearOpMode {
             RobotInitializers.Dashtelemetry.addData("vel y",Localizer.getVelocity().y);
             RobotInitializers.Dashtelemetry.addData("vel h",Localizer.getVelocity().h);
 
-            if(30 - time.seconds() <= 2.5 && robotstate != RobotStates.SUBMERSIBLESAMPLECYCLE && !Wasparked) {
+            if(30 - time.seconds() <= 1 && (robotstate != RobotStates.SUBMERSIBLESAMPLECYCLE || Localizer.getDistanceFromTwoPoints(new SparkFunOTOS.Pose2D(-430, -1290,0),Localizer.getCurrentPosition()) < 80) && !Wasparked) {
                 Parkingtasks.AddAnotherScheduler(ParkingActions());
                 Wasparked = true;
             }

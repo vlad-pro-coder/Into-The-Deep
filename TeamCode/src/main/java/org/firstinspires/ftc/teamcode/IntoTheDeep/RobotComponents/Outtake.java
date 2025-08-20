@@ -31,7 +31,7 @@ public class Outtake {
                                 timeBeforeLastExtensionUpdate = new ElapsedTime();
     static {
         armProfile = new AsymmetricMotionProfile(9000, 2200, 1850);
-        ExtensionProfile = new AsymmetricMotionProfile(400, 100000, 100000);
+        ExtensionProfile = new AsymmetricMotionProfile(6000, 4000, 4000);
     }
 
     public static void OverheadMoveWhenOverBasket(double val){

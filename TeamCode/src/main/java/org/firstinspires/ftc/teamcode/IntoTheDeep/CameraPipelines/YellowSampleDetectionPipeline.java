@@ -56,6 +56,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
     public static double SizeTreshold = 200;
     private Mat mask = new Mat(), tmp = new Mat(),
             labels = new Mat(), stats = new Mat(), centroids = new Mat(), undistorted = new Mat();
+    public static double focalOffX, focalOffY = 90 ;
 
     private static Point getMiddleTargetPoint(Mat stat, int i){
         double xM = (stat.get(i, Imgproc.CC_STAT_LEFT)[0] + stat.get(i, Imgproc.CC_STAT_WIDTH)[0]) / 2.d;
@@ -73,6 +74,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
     private List<Double> tx, ty;
     private int biggestDetectionID = 0;
     public boolean newResultsReady = false;
+    public static double cxOff = -24, cyOff = 0;
 
     @Override
     public Mat processFrame(Mat input) {
@@ -99,10 +101,10 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
 
         int noSamples = Imgproc.connectedComponentsWithStats(mask, labels, stats, centroids, 8);
 
-        double focalX = 622.001;
-        double focalY = 622.001;
-        double cx = 319.803d;
-        double cy = 241.251d;
+        double focalX = 622.001 / 2.f + focalOffX;
+        double focalY = 622.001 / 2.f + focalOffY;
+        double cx = 319.803d / 2.d + cxOff;
+        double cy = 241.251d / 2.d + cyOff;
 
         if(showMask){
             input = mask.clone();
@@ -126,14 +128,14 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
                     w = stats.get(i, Imgproc.CC_STAT_WIDTH)[0],
                     h = stats.get(i, Imgproc.CC_STAT_HEIGHT)[0];
 
-            Point target = new Point(x + w/2.d, y + h/2.d);
+            Point target = new Point(x + w/2.d, y + h);
 
             double dx = (target.x - cx) / focalX;
             double dy = (target.y - cy) / focalY;
 
             // get the angle
             ttx.add(Math.atan(dx));
-            tty.add(Math.atan(dy));
+            tty.add(-Math.atan(dy));
 
         }
         Point bb1 = new Point(0, 0), bb2 = new Point(0, 0);
@@ -148,7 +150,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
                     w = stats.get(i, Imgproc.CC_STAT_WIDTH)[0],
                     h = stats.get(i, Imgproc.CC_STAT_HEIGHT)[0];
 
-            Point target = new Point(x + w/2.d, y + h/2.d);
+            Point target = new Point(x + w/2.d, y + h);
             Point b1 = new Point(x, y);
             Point b2 = new Point(x + w, y + h);
             Imgproc.circle(input, target, radius, new Scalar(0, 0, 255));
@@ -247,7 +249,7 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
 
             double accepted_distance = startingY + Math.toDegrees(Math.abs(Localizer.getAngleDifference(Math.toRadians(0),data.h))) * diminuator;
 
-            if(IsIgnored(data) || distances.y < accepted_distance || data.x > Extendo.MaxExtension+100 || Math.abs(Localizer.getAngleDifference(Math.toRadians(0),data.h)) > Math.toRadians(40))
+            if(IsIgnored(data) || distances.y < accepted_distance || data.x > Extendo.MaxExtension || Math.abs(Localizer.getAngleDifference(Math.toRadians(26),data.h)) > Math.toRadians(40))
                 continue;
             if(data.x < mini){
                 mini = data.x;

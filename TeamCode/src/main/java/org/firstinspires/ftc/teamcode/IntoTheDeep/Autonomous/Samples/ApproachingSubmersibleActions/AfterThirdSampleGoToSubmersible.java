@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake;
 public class AfterThirdSampleGoToSubmersible {
     public static Scheduler AfterThirdSampleGoToSubmersibleActions() {
         return new Scheduler()
-                .addTask(new Task() {
+                /*.addTask(new Task() {
                     @Override
                     protected void Actions() {
                         Chassis.Heading.setPidCoefficients(Chassis.ToSubermsibleHeading);
@@ -24,7 +24,7 @@ public class AfterThirdSampleGoToSubmersible {
                     protected boolean Conditions() {
                         return true;
                     }
-                })
+                })*/
                 .StartPurePersuit(PUREPERSUIT_pathtosubmersible, HEADING_infrontofsubmersible, PUREPERSUIT_radius)
                 .addTask(new Task() {
                     @Override

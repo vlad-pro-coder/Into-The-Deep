@@ -57,7 +57,7 @@ public class CameraTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         RobotInitializers.InitializeFull(hardwareMap);
-        RobotInitializers.InitializeForOperation();
+        RobotInitializers.InitializeForOperationTeleop();
         Outtake.armProfile.setInstant(351);
         Intake.DropUp();
         Extendo.DoingAuto = true;
@@ -77,6 +77,10 @@ public class CameraTest extends LinearOpMode {
             YellowSampleDetectionPipeline.SamplePoint sample = camera.yellow.getBestTxTy();
             SparkFunOTOS.Pose2D offsets = getPositionRelativeToRobot(sample.x, sample.y);
             SparkFunOTOS.Pose2D data = getExtendoRotPair(sample.x, sample.y);
+
+
+            RobotInitializers.Dashtelemetry.addData("tx",sample.x);
+            RobotInitializers.Dashtelemetry.addData("ty",sample.y);
 
             RobotInitializers.Dashtelemetry.addData("extendo distance pachy style",(Math.sqrt(data.x * data.x + data.y * data.y)) * k);
 

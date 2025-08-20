@@ -89,7 +89,7 @@ public class Lift {
                 setLiftPower(-1);
                 boolean ShouldReset;
                 try {
-                    ShouldReset = lm.getState();
+                    ShouldReset = lm.getState() || (Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40);
                 } catch (Exception e) {
                     ShouldReset = motor1.getCurrent(CurrentUnit.AMPS) >= 4 && motor2.getCurrent(CurrentUnit.AMPS) >= 4  && Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40;
                     Dashtelemetry.addData("lift limit switch not operational", "");

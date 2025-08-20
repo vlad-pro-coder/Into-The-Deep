@@ -89,7 +89,7 @@ public class Intake {
         return getStorageStatus() == SampleType.YELLOW || HasExactTeamPiece();
     }
     public static boolean HasWrongTeamPiece() {
-        return !HasExactTeamPiece();
+        return (team == TEAM.RED && getStorageStatus() == SampleType.BLUE) || (team == TEAM.BLUE || getStorageStatus() == SampleType.RED);
     }
 
 }

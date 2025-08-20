@@ -37,7 +37,7 @@ public class TakeCachedSample {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        Extendo.setExtendoPos(data.x-30);
+                        Extendo.setExtendoPos(data.x);
                     }
 
                     @Override

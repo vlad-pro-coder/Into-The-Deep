@@ -105,24 +105,25 @@ public class Climb {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        PtoAndWheelie.disengagePTO();
-                        Lift.state = Lift.LIFTSTATES.FREEWILL;
-                        Lift.setLiftPos(BAR2);
+                        //PtoAndWheelie.disengagePTO();
+                        //Lift.state = Lift.LIFTSTATES.FREEWILL;
+                        //Lift.setLiftPos(BAR2);
+                        PtoAndWheelie.setPosChassisDrivenLift(BAR2);
                     }
 
                     @Override
                     protected boolean Conditions() {
                         if(pitch > 3 && (Lift.getPosition() <= BAR2 - 30 && Lift.getPosition() >= 250))
-                            Lift.state = Lift.LIFTSTATES.OFF;
+                            PtoAndWheelie.powerToChassis(0);
                         else
-                            Lift.state = Lift.LIFTSTATES.FREEWILL;
+                            PtoAndWheelie.UpdateChassisDrivenLift();
                         return Lift.getPosition() >= BAR2 - 20;
                     }
                 })
                 .addTask(new Task() {     ///pula pula pula pula pula pula pula pula pula pula pula pula pula pula pula pula
                     @Override
                     protected void Actions() {
-                        Lift.state = Lift.LIFTSTATES.FREEWILL;
+                        //Lift.state = Lift.LIFTSTATES.FREEWILL;
                         Outtake.setOverHeadPos(climbArmIntertia);
                     }
 
@@ -140,7 +141,7 @@ public class Climb {
                     @Override
                     protected boolean Conditions() {
                         if(pitch > -3){
-                            Lift.setLiftPos(BAR2 - 250);
+                            PtoAndWheelie.setPosChassisDrivenLift(BAR2 - 250);
                             return true;
                         }
                         return false;
@@ -154,22 +155,23 @@ public class Climb {
 
                     @Override
                     protected boolean Conditions() {
+                        PtoAndWheelie.UpdateChassisDrivenLift();
                         return Lift.getPosition() < BAR2 - 100;
                     }
                 })
-                .addTask(new Task() {
+                /*.addTask(new Task() {
                     @Override
                     protected void Actions() {
                         PtoAndWheelie.engagePTO();
-                        PtoAndWheelie.powerToChassis(-0.4);
-                        Lift.CustomPowerToMotors(0.4);
+                        PtoAndWheelie.powerToChassis(-0.3);
+                        Lift.CustomPowerToMotors(0.3);
                     }
 
                     @Override
                     protected boolean Conditions() {
                         return true;
                     }
-                })
+                })*/
                 .waitSeconds(0.1)
                 .addTask(new Task() {
                     @Override
@@ -188,12 +190,13 @@ public class Climb {
 
                     @Override
                     protected void Actions() {
-                        PtoAndWheelie.powerToChassis(0);
+                        PtoAndWheelie.setPosChassisDrivenLift(-10);
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return true;
+                        PtoAndWheelie.UpdateChassisDrivenLift();
+                        return false;
                     }
                 })
         ;
