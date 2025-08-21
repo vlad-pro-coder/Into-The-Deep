@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic;
 
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.InitialReset.InitialResetNotParked;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.InitialReset.InitialResetParked;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic.DropSampleAndRetract.DropSampleAndRetractActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic.HighBasketScore.HighBasketScoreActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic.LowBasketScore.LowBasketScoreActions;
@@ -17,6 +19,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Scheduler;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.Samples;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Lift;
@@ -36,6 +39,10 @@ public class MainHandler {
 
     public MainHandler(){
         currentTasks = new Scheduler();
+        if(Samples.Wasparked)
+            currentTasks.AddAnotherScheduler(InitialResetParked());
+        else
+            currentTasks.AddAnotherScheduler(InitialResetNotParked());
     }
     public enum ActionStates{
         SAMPLETRANSFER,
@@ -58,7 +65,10 @@ public class MainHandler {
             RobotInitializers.Dashtelemetry.addLine("error cannot move extendo in free to move intake");
             return;
         }
-
+        if(gm1.left_bumper && gm1.right_bumper){
+            Intake.RotateToEject();
+            Intake.Unblock();
+        }
         if(gm1.left_bumper){
             //eject
             Intake.RotateToEject(0.6);
@@ -142,8 +152,8 @@ public class MainHandler {
                             }
                             if(currentTasks.IsSchedulerDone() && DidLiftSampleUp){
                                 Outtake.ExtensionMoveWhenOverBasket(Math.abs(gm2.right_stick_y) < 0.05 ? 0:-gm2.right_stick_y);
-                                int left_bumper = gm2.left_bumper ? 1 : 0;
-                                int right_bumper = gm2.right_bumper ? 1 : 0;
+                                int left_bumper = gm2.left_bumper ? 3 : 0;
+                                int right_bumper = gm2.right_bumper ? 3 : 0;
                                 Outtake.OverheadMoveWhenOverBasket(right_bumper - left_bumper);
                             }
                             if(gm1.cross != prev1.cross && gm1.cross && DidLiftSampleUp && currentTasks.IsSchedulerDone() && TightGripOfClaw) {

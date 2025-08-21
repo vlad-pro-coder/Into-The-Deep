@@ -212,7 +212,6 @@ public class RobotInitializers {
         Extendo.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Extendo.encoder = new CachedMotor(ExpansionHubMotors, 1, DcMotorSimple.Direction.FORWARD);
         Extendo.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        Extendo.pidBalancing.setTargetPosition(imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES));
         Extendo.lm = new LimitSwitch(ExpansionHubDigital,1);
         MotorConfigurationType m = Extendo.motor.getMotorType();
         m.setAchieveableMaxRPMFraction(1.0);

@@ -29,8 +29,10 @@ public class Extendo {
     }
 
     public static CachedMotor motor, encoder;
-    public static PIDController pidController = new PIDController(0.0075, 0, 0.0002),
-                                pidBalancing = new PIDController(-0.13,0,0);
+    public static PIDController pidController = new PIDController(0.0075, 0, 0.0002);
+    public static double lasttime = 0;
+    public static double TimeBeforeAlternativeReset = 2.0;
+    public static boolean OnceGivenTasks = false;
     public static LimitSwitch lm;
     public static final int MaxExtension = 910;
     public static ExtendoStates state = ExtendoStates.RETRACTING;
@@ -91,20 +93,26 @@ public class Extendo {
                 break;
 
             case RETRACTING:
-
                 motor.setPower(-1);
+                if(!OnceGivenTasks){
+                    lasttime = System.currentTimeMillis() / 1000.0;
+                    OnceGivenTasks = true;
+                }
                 boolean ShouldReset;
                 try {
                     ShouldReset = lm.getState();
+                    if(System.currentTimeMillis()/1000.0 - lasttime > TimeBeforeAlternativeReset && !lm.getState())
+                        throw new Exception("somethings");
                 } catch (Exception e) {
                     ShouldReset = motor.getCurrent(CurrentUnit.AMPS) >= 4 && Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40;
-                    Dashtelemetry.addData("lift limit switch not operational", "");
+                    Dashtelemetry.addData("Extendo limit switch not operational", "");
                 }
                 if (ShouldReset) {
                     motor.setPower(0);
                     encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     setExtendoPos(0);
+                    OnceGivenTasks = false;
                     if (!DoingAuto)
                         state = ExtendoStates.FREEWILL;
                     else {

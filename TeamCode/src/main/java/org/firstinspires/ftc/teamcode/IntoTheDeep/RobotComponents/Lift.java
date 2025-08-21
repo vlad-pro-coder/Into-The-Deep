@@ -21,11 +21,14 @@ public class Lift {
     public static double MaxHighBasketPos = 820;
     public static double MaxLowBasketPos = 350;
     public static CachedMotor motor1,motor2,encoder;
-    public static double LowBasketPos = 300,HighBasketPos = 800;
+    public static double LowBasketPos = 300,HighBasketPos = 820;
     public static double currentPos = 0;
     private static double PowerToMotors = 0;
     public static LimitSwitch lm;
     public static PIDController pidController = new PIDController(0.0065,0.0003,0.0003);
+    public static double lasttime = 0;
+    public static double TimeBeforeAlternativeReset = 2.0;
+    public static boolean OnceGivenTasks = false;
     public static boolean DoingAuto = false;
 
     public static double powerDown = -0.1,powerUp = 0.2;
@@ -87,9 +90,15 @@ public class Lift {
                 break;
             case RETRACTING:
                 setLiftPower(-1);
+                if(!OnceGivenTasks){
+                    lasttime = System.currentTimeMillis() / 1000.0;
+                    OnceGivenTasks = true;
+                }
                 boolean ShouldReset;
                 try {
                     ShouldReset = lm.getState();
+                    if(System.currentTimeMillis()/1000.0 - lasttime > TimeBeforeAlternativeReset && !lm.getState())
+                        throw new Exception("somethings");
                 } catch (Exception e) {
                     ShouldReset = motor1.getCurrent(CurrentUnit.AMPS) >= 4 && motor2.getCurrent(CurrentUnit.AMPS) >= 4  && Math.abs(encoder.getVelocity()) <= 0 && getPosition() < 40;
                     Dashtelemetry.addData("lift limit switch not operational", "");
@@ -101,27 +110,30 @@ public class Lift {
                     encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     state = LIFTSTATES.OFF;
                     setLiftPos(0);
+                    OnceGivenTasks = false;
                 }
                 break;
             case LOWBASKET:
                 setLiftPower(pidController.calculatePower(getPosition()) + LinearFunction.getOutput(powerDown,powerUp,intervalStart,intervalEnd,getPosition()));
-                if(-gm2.left_stick_y > 0.05 && LowBasketPos + currentPos + -gm2.left_stick_y <= MaxLowBasketPos){
-                    currentPos += -gm2.left_stick_y * 3;
+                double gmlow = -gm2.left_stick_y * 3;
+                if(-gm2.left_stick_y > 0.05 && LowBasketPos + currentPos + gmlow <= MaxLowBasketPos){
+                    currentPos += gmlow;
                     setLiftPos(LowBasketPos + currentPos);
                 }
-                else if(-gm2.left_stick_y < -0.05 && LowBasketPos + currentPos - -gm2.left_stick_y >= LowBasketPos){
-                    currentPos -= -gm2.left_stick_y * 3;
+                else if(-gm2.left_stick_y < -0.05 && LowBasketPos + currentPos - gmlow >= MaxLowBasketPos-100){
+                    currentPos -= gmlow;
                     setLiftPos(LowBasketPos + currentPos);
                 }
                 break;
             case HIGHBASKET:
                 setLiftPower(pidController.calculatePower(getPosition()) + LinearFunction.getOutput(powerDown,powerUp,intervalStart,intervalEnd,getPosition()));
-                if(-gm2.left_stick_y > 0.05 && HighBasketPos + currentPos + -gm2.left_stick_y <= MaxHighBasketPos){
-                    currentPos += -gm2.left_stick_y * 3;
+                double gmhigh = -gm2.left_stick_y * 3;
+                if(-gm2.left_stick_y > 0.05 && HighBasketPos + currentPos + gmhigh <= MaxHighBasketPos){
+                    currentPos += gmhigh;
                     setLiftPos(HighBasketPos + currentPos);
                 }
-                else if(-gm2.left_stick_y < -0.05 && HighBasketPos + currentPos - -gm2.left_stick_y >= HighBasketPos){
-                    currentPos -= -gm2.left_stick_y * 3;
+                else if(-gm2.left_stick_y < -0.05 && HighBasketPos + currentPos - gmhigh >= MaxHighBasketPos-100){
+                    currentPos -= gmhigh;
                     setLiftPos(HighBasketPos + currentPos);
                 }
                 break;

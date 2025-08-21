@@ -226,7 +226,7 @@ public class Samples extends LinearOpMode {
             RobotInitializers.Dashtelemetry.addData("vel y",Localizer.getVelocity().y);
             RobotInitializers.Dashtelemetry.addData("vel h",Localizer.getVelocity().h);
 
-            if(30 - time.seconds() <= 1 && (robotstate != RobotStates.SUBMERSIBLESAMPLECYCLE || Localizer.getDistanceFromTwoPoints(new SparkFunOTOS.Pose2D(-430, -1290,0),Localizer.getCurrentPosition()) < 80) && !Wasparked) {
+            if(30 - time.seconds() <= 1 && (robotstate != RobotStates.SUBMERSIBLESAMPLECYCLE || (robotstate == RobotStates.SUBMERSIBLESAMPLECYCLE && Localizer.getDistanceFromTwoPoints(new SparkFunOTOS.Pose2D(-430, -1290,0),Localizer.getCurrentPosition()) < 80 && tasks.tasks.size() <= 3 )) && !Wasparked) {
                 Parkingtasks.AddAnotherScheduler(ParkingActions());
                 Wasparked = true;
             }
