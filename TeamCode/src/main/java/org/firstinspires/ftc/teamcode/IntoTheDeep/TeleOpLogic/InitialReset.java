@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Lift;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.PtoAndWheelie;
 
 public class InitialReset {
     public static Scheduler InitialResetNotParked(){
@@ -15,6 +16,8 @@ public class InitialReset {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
+                        PtoAndWheelie.disengagePTO();
+                        PtoAndWheelie.IdleWheeliePos();
                         Outtake.armProfile.setInstant(OverHeadTakeSampPos-1);
                         Outtake.OverHead_TAKESAMPLE();
                         Outtake.setExtensionPos(0);
@@ -58,6 +61,8 @@ public class InitialReset {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
+                        PtoAndWheelie.disengagePTO();
+                        PtoAndWheelie.IdleWheeliePos();
                         Lift.state = Lift.LIFTSTATES.FREEWILL;
                         Lift.setLiftPos(500);
                     }
@@ -80,10 +85,9 @@ public class InitialReset {
 
                     @Override
                     protected boolean Conditions() {
-                        return true;
+                        return Outtake.ExtensionDoneness() && Outtake.OverHeadDoneness();
                     }
                 })
-                .waitSeconds(0.1)
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {

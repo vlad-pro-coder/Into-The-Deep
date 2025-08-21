@@ -250,6 +250,8 @@ public class RobotInitializers {
     }
 
     public static void InitializeForOperationAuto(){
+        PtoAndWheelie.disengagePTO();
+        PtoAndWheelie.IdleWheeliePos();
         Lift.state = Lift.LIFTSTATES.RETRACTING;
         Extendo.state = Extendo.ExtendoStates.RETRACTING;
         Outtake.armProfile.setInstant(OVERHEAD_startingpos-1);

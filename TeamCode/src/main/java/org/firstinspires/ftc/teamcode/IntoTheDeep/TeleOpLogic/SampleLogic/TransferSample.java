@@ -40,7 +40,107 @@ public class TransferSample {
                         return true;
                     }
                 })
+                .waitSeconds(0.05)
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Intake.RotateToEject();
+                        Extendo.state = Extendo.ExtendoStates.RETRACTING;
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Extendo.state != Extendo.ExtendoStates.RETRACTING;
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Lift.state = Lift.LIFTSTATES.RETRACTING;
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Lift.state != Lift.LIFTSTATES.RETRACTING;
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Lift.CustomPowerToMotors(-0.5);
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return true;
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Intake.StopSpinner();
+                        Outtake.setExtensionPos(0.3);
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Outtake.OverHeadDoneness();
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Outtake.closeClawTight();
+                    }
+                    @Override
+                    protected boolean Conditions() {
+                        return Outtake.IsClawDone();
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Lift.state = Lift.LIFTSTATES.OFF;
+                        Intake.Unblock();
+                    }
+                    @Override
+                    protected boolean Conditions() {
+                        return true;
+                    }
+                });
+    }
+    public static Scheduler TransferSampleSquareActions(){
+        return new Scheduler()
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Outtake.openClaw();
+                        Outtake.setExtensionPos(0);
+                        Outtake.OverHead_TAKESAMPLE();
+                        Intake.RotateToStore();
+                        Intake.DropUp();
+                        Lift.state = Lift.LIFTSTATES.FREEWILL;
+                        Lift.setLiftPos(30);
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return true;
+                    }
+                })
                 .waitSeconds(0.1)
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Intake.Block();
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return true;
+                    }
+                })
+                .waitSeconds(0.05)
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {

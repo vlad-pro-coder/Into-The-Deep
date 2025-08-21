@@ -14,18 +14,37 @@ public class PanicReset {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        Lift.state = Lift.LIFTSTATES.OFF;
                         Outtake.openClaw();
-                        Extendo.state = Extendo.ExtendoStates.FREEWILL;
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Outtake.IsClawDone();
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
                         Outtake.OverHead_TAKESAMPLE();
                         Outtake.setExtensionPos(0);
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Outtake.IsClawDone() &&
-                                Outtake.OverHeadDoneness(30) &&
-                                Outtake.ExtensionDoneness();
+                        return Outtake.OverHeadDoneness(60) && Outtake.ExtensionDoneness();
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Lift.state = Lift.LIFTSTATES.OFF;
+                        Outtake.closeClaw();
+                        Extendo.state = Extendo.ExtendoStates.FREEWILL;
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Outtake.IsClawDone();
                     }
                 })
                 .addTask(new Task() {
@@ -36,7 +55,18 @@ public class PanicReset {
 
                     @Override
                     protected boolean Conditions() {
-                        return Lift.getPosition() < 30;
+                        return Lift.state != Lift.LIFTSTATES.RETRACTING;
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Outtake.openClaw();
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Outtake.IsClawDone();
                     }
                 })
                 .addTask(new Task() {

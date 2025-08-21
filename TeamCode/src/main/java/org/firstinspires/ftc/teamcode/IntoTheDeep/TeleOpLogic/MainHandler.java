@@ -7,6 +7,7 @@ import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic.LowBasketScore.LowBasketScoreActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.PanicActions.PanicElevatorPos.PanicElevatorUpActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.PanicActions.PanicReset.PanicResetActions;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic.TransferSample.TransferSampleSquareActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SwitchToSamples.SwitchToSampsActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SwitchToSpecimens.SwitchToSpecsActions;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic.TransferSample.TransferSampleActions;
@@ -131,9 +132,12 @@ public class MainHandler {
             case SAMPLES:
                 switch (CurrentState){
                     case SAMPLETRANSFER:
-                        if(gm1.square != prev1.square && gm1.square)
+                        if(gm1.square != prev1.square && gm1.square) {
                             currentTasks.clear();
-                        if(currentTasks.IsSchedulerDone() && (Intake.HasMixedTeamPiece() || gm1.square)) {//change
+                            currentTasks.AddAnotherScheduler(TransferSampleSquareActions());
+                            CurrentState = ActionStates.SAMPLEBASKET;
+                        }
+                        if(currentTasks.IsSchedulerDone() && Intake.HasMixedTeamPiece()) {//change
                             currentTasks.AddAnotherScheduler(TransferSampleActions());
                             CurrentState = ActionStates.SAMPLEBASKET;
                         }

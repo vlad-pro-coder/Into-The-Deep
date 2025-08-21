@@ -19,7 +19,7 @@ import org.opencv.core.Mat;
 public class Lift {
 
     public static double MaxHighBasketPos = 820;
-    public static double MaxLowBasketPos = 350;
+    public static double MaxLowBasketPos = 400;
     public static CachedMotor motor1,motor2,encoder;
     public static double LowBasketPos = 300,HighBasketPos = 820;
     public static double currentPos = 0;
@@ -114,14 +114,16 @@ public class Lift {
                 }
                 break;
             case LOWBASKET:
+                Dashtelemetry.addData("current",currentPos);
                 setLiftPower(pidController.calculatePower(getPosition()) + LinearFunction.getOutput(powerDown,powerUp,intervalStart,intervalEnd,getPosition()));
                 double gmlow = -gm2.left_stick_y * 3;
+                Dashtelemetry.addData("gmlow",gmlow);
                 if(-gm2.left_stick_y > 0.05 && LowBasketPos + currentPos + gmlow <= MaxLowBasketPos){
                     currentPos += gmlow;
                     setLiftPos(LowBasketPos + currentPos);
                 }
-                else if(-gm2.left_stick_y < -0.05 && LowBasketPos + currentPos - gmlow >= MaxLowBasketPos-100){
-                    currentPos -= gmlow;
+                else if(-gm2.left_stick_y < -0.05 && LowBasketPos + currentPos + gmlow >= MaxLowBasketPos-200){
+                    currentPos += gmlow;
                     setLiftPos(LowBasketPos + currentPos);
                 }
                 break;
@@ -132,8 +134,8 @@ public class Lift {
                     currentPos += gmhigh;
                     setLiftPos(HighBasketPos + currentPos);
                 }
-                else if(-gm2.left_stick_y < -0.05 && HighBasketPos + currentPos - gmhigh >= MaxHighBasketPos-100){
-                    currentPos -= gmhigh;
+                else if(-gm2.left_stick_y < -0.05 && HighBasketPos + currentPos + gmhigh >= MaxHighBasketPos-200){
+                    currentPos += gmhigh;
                     setLiftPos(HighBasketPos + currentPos);
                 }
                 break;

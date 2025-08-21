@@ -68,7 +68,7 @@ public class Samples extends LinearOpMode {
         PARKING,
     }
     public boolean WereInstructionGiven = false;
-    public boolean Wasparked = false;
+    public static boolean Wasparked = false;
     public RobotStates robotstate = RobotStates.OCCUPIEDPRELOADS;
     public ElapsedTime time = new ElapsedTime();
     public static
