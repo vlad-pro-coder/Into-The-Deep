@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic;
 
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.ParkingActions.ParkingConstants.OVERHEAD_forparking;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake.OverHeadTakeSampPos;
 
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Scheduler;
@@ -16,6 +17,7 @@ public class InitialReset {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
+                        Extendo.state = Extendo.ExtendoStates.FREEWILL;
                         PtoAndWheelie.disengagePTO();
                         PtoAndWheelie.IdleWheeliePos();
                         Outtake.armProfile.setInstant(OverHeadTakeSampPos-1);
@@ -64,20 +66,31 @@ public class InitialReset {
                         PtoAndWheelie.disengagePTO();
                         PtoAndWheelie.IdleWheeliePos();
                         Lift.state = Lift.LIFTSTATES.FREEWILL;
-                        Lift.setLiftPos(500);
+                        Lift.setLiftPos(450);
+                        Extendo.state = Extendo.ExtendoStates.FREEWILL;
+                        Outtake.setOverHeadPos(OVERHEAD_forparking-40);
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Lift.IsLiftDone(30);
+                        return Lift.IsLiftDone(30) && Outtake.OverHeadDoneness();
                     }
                 })
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        Outtake.armProfile.setInstant(OverHeadTakeSampPos - 1);
-                        Outtake.OverHead_TAKESAMPLE();
                         Outtake.setExtensionPos(0);
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return Outtake.ExtensionDoneness();
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Outtake.OverHead_TAKESAMPLE();
                         Outtake.closeClaw();
                         Intake.DropUp();
                         Intake.Unblock();

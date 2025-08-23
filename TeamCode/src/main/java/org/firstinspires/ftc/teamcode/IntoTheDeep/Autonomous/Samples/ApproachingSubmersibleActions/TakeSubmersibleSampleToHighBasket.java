@@ -68,6 +68,7 @@ public class TakeSubmersibleSampleToHighBasket {
                     @Override
                     protected void Actions() {
                         Lift.state = Lift.LIFTSTATES.RETRACTING;
+                        Intake.RotateToStore();
                     }
 
                     @Override
@@ -91,7 +92,6 @@ public class TakeSubmersibleSampleToHighBasket {
                     @Override
                     protected void Actions() {
                         Outtake.closeClaw();
-                        Intake.StopSpinner();
                     }
 
                     @Override
@@ -119,17 +119,19 @@ public class TakeSubmersibleSampleToHighBasket {
                         Extendo.state = Extendo.ExtendoStates.BALANCEFROMPOINT;
                         Lift.state = Lift.LIFTSTATES.FREEWILL;
                         Lift.setLiftPos(LIFT_high);
-                        Outtake.setExtensionPos(EXTENSION_readytakesample);
+                        Intake.StopSpinner();
+                        Outtake.setExtensionPos(EXTENSION_readytakesample+0.1);
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Lift.IsLiftDone(300) && Outtake.OverHeadDoneness() && Outtake.ExtensionDoneness() && Chassis.IsHeadingDone(5) && Chassis.IsPositionDone(100) && Localizer.getVelocity().x < 200 && Localizer.getVelocity().y < 200;
+                        return Lift.IsLiftDone(300) && Outtake.OverHeadDoneness() && Outtake.ExtensionDoneness() && Chassis.IsHeadingDone(5) && Chassis.IsPositionDone(100) && Localizer.getVelocity().x < 250 && Localizer.getVelocity().y < 250;
                     }
                 })
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
+                        Chassis.usedTrajectory = Chassis.trajectoryStates.OFF;
                         Outtake.openClaw();
                         Intake.DropUp();
                         Extendo.state = Extendo.ExtendoStates.RETRACTING;
@@ -138,6 +140,17 @@ public class TakeSubmersibleSampleToHighBasket {
                     @Override
                     protected boolean Conditions() {
                         return Outtake.IsClawDone();
+                    }
+                })
+                .addTask(new Task() {
+                    @Override
+                    protected void Actions() {
+                        Chassis.usedTrajectory = Chassis.trajectoryStates.FOLLOWINGPUREPERSUIT;
+                    }
+
+                    @Override
+                    protected boolean Conditions() {
+                        return true;
                     }
                 })
                 /*.addTask(new Task() {

@@ -27,7 +27,7 @@ public class Lift {
     public static LimitSwitch lm;
     public static PIDController pidController = new PIDController(0.0065,0.0003,0.0003);
     public static double lasttime = 0;
-    public static double TimeBeforeAlternativeReset = 2.0;
+    public static double TimeBeforeAlternativeReset = 0.5;
     public static boolean OnceGivenTasks = false;
     public static boolean DoingAuto = false;
 

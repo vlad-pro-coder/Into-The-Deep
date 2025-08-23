@@ -76,19 +76,14 @@ public class Samples extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         RobotInitializers.InitializeFull(hardwareMap);
-        Localizer.Reset();
-        while(Localizer.pinPoint.getDeviceStatus() == PinPoint.DeviceStatus.CALIBRATING) {
-            RobotInitializers.Dashtelemetry.addLine("pinpoint reseting");
-            RobotLog.ii("pinpoint","" + Localizer.pinPoint.getDeviceStatus());
-        }
         RobotInitializers.InitializeForOperationAuto();
 
         camera  = new Logitech920("logitik",hardwareMap);
         Scheduler tasks = new Scheduler();
         Scheduler Parkingtasks = new Scheduler();
-        tasks.AddAnotherScheduler(FasterPreloadGrabingScoringActions(CHASSIS_sample1pos,EXTENDO_sample1,0.7,LIFT_preload,OVERHEAD_preload,EXTENSION_secondsample));
-        tasks.AddAnotherScheduler(SimultaniosSampleGrabingScoringActions(CHASSIS_sample2pos,EXTENDO_sample2,0.7,LIFT_firstsample,OVERHEAD_firstsample,EXTENSION_secondsample));
-        tasks.AddAnotherScheduler(SimultaniosSampleGrabingScoringActions(CHASSIS_sample3pos,EXTENDO_sample3,0.7,LIFT_secondsample,OVERHEAD_secondsample,EXTENSION_secondsample));
+        tasks.AddAnotherScheduler(FasterPreloadGrabingScoringActions(CHASSIS_sample1pos,EXTENDO_sample1,0.7,LIFT_preload,OVERHEAD_preload,EXTENSION_overbasket-0.1));
+        tasks.AddAnotherScheduler(SimultaniosSampleGrabingScoringActions(CHASSIS_sample2pos,EXTENDO_sample2,0.7,LIFT_firstsample,OVERHEAD_firstsample,EXTENSION_secondsample-0.1));
+        tasks.AddAnotherScheduler(SimultaniosSampleGrabingScoringActions(CHASSIS_sample3pos,EXTENDO_sample3,0.7,LIFT_secondsample,OVERHEAD_secondsample,EXTENSION_secondsample-0.2));
         tasks.AddAnotherScheduler(PutLastSamplePredefinedActions(LIFT_thirdsample,OVERHEAD_thirdsample,EXTENSION_overbasket));
 
         Chassis.usedTrajectory = Chassis.trajectoryStates.FREEWILL;
@@ -98,12 +93,17 @@ public class Samples extends LinearOpMode {
 
 
         while(opModeInInit()){
+
             RobotInitializers.clearCache();
 
             Lift.update();
             Extendo.update();
             Outtake.update();
             Localizer.Update();
+            telemetry.addData("x",Localizer.getCurrentPosition().x);
+            telemetry.addData("y",Localizer.getCurrentPosition().y);
+            telemetry.addData("h",Localizer.getCurrentPosition().h);
+            telemetry.update();
             //Chassis.update();//to comment
 
             RobotInitializers.Dashtelemetry.addData("x encoder",Localizer.pinPoint.getEncoderX());
@@ -120,6 +120,11 @@ public class Samples extends LinearOpMode {
 
             switch (robotstate){
                 case OCCUPIEDPRELOADS:
+                    if(Extendo.state  != Extendo.ExtendoStates.RETRACTING && Extendo.getPosition() >= 650 && !Intake.isStorageEmpty() ){
+                        Extendo.state = Extendo.ExtendoStates.RETRACTING;
+                        Intake.Block();
+                        Intake.DropUp();
+                    }
                     if(tasks.IsSchedulerDone()) {
                         tasks.AddAnotherScheduler(AfterThirdSampleGoToSubmersibleActions());
                         robotstate = RobotStates.CRUISETOSUBMERSIBLE;
@@ -180,7 +185,7 @@ public class Samples extends LinearOpMode {
                         RobotLog.ii("color detected", "" + Intake.getStorageStatus());
                         RobotLog.ii("reached trapdoor", "" + Intake.SampleReachedTrapDoor());
 
-                        if(Intake.HasMixedTeamPiece()) {//change in color
+                        if(Intake.HasMixedTeamPiece() && Intake.SampleReachedTrapDoor()) {//change in color
                             if(30 - time.seconds() > 1)
                                 robotstate = RobotStates.SUBMERSIBLESAMPLECYCLE;
                             RobotLog.ii("accepted","");

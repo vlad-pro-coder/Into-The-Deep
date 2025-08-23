@@ -25,6 +25,7 @@ public class Climb {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
+                        Outtake.closeClaw();
                         Lift.state = Lift.LIFTSTATES.OFF;
                         PtoAndWheelie.TiltRobot();
                         PtoAndWheelie.disengagePTO();
@@ -80,13 +81,13 @@ public class Climb {
                     @Override
                     protected void Actions() {
                         Lift.state = Lift.LIFTSTATES.OFF;
-                        PtoAndWheelie.setPosChassisDrivenLift(-20);
+                        PtoAndWheelie.setPosChassisDrivenLift(-40);
                     }
 
                     @Override
                     protected boolean Conditions() {
                         PtoAndWheelie.UpdateChassisDrivenLift();
-                        return Lift.getPosition() < 5;
+                        return Lift.getPosition() < 10;
                     }
                 })
                 .addTask(new Task() {

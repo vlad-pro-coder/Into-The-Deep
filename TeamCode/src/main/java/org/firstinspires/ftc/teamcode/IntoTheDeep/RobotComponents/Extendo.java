@@ -31,7 +31,7 @@ public class Extendo {
     public static CachedMotor motor, encoder;
     public static PIDController pidController = new PIDController(0.0075, 0, 0.0002);
     public static double lasttime = 0;
-    public static double TimeBeforeAlternativeReset = 2.0;
+    public static double TimeBeforeAlternativeReset = 1;
     public static boolean OnceGivenTasks = false;
     public static LimitSwitch lm;
     public static final int MaxExtension = 910;

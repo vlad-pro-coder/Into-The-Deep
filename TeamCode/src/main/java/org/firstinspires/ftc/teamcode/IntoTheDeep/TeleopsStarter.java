@@ -5,12 +5,15 @@ import static org.firstinspires.ftc.teamcode.IntoTheDeep.Climb.Climb.ClimbAction
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.Climb.ClimbConstants.ClimbUnderWay;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.Climb.Climb.updateClimb;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.Climb.ClimbConstants.tasks;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake.lastreads;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.IntoTheDeep.Climb.ClimbConstants;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ControllersRelated.SimplyfiedControllers;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.Colors;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Chassis;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
@@ -19,6 +22,9 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.MainHandler;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class TeleopsStarter {
     public static TEAM team = TEAM.RED;
@@ -33,6 +39,14 @@ public class TeleopsStarter {
     public TeleopsStarter(HardwareMap hardwareMap,TEAM color,Gamepad gm1,Gamepad gm2){
         TeleopsStarter.gm1 = gm1;
         TeleopsStarter.gm2 = gm2;
+        lastreads = new ArrayList<>(
+                Arrays.asList(
+                        Colors.ColorType.NONE,
+                        Colors.ColorType.NONE,
+                        Colors.ColorType.NONE
+                )
+        );
+        tasks.clear();
         RobotInitializers.InitializeFull(hardwareMap);
         RobotInitializers.disable();
         ActionHandler = new MainHandler();
@@ -52,7 +66,6 @@ public class TeleopsStarter {
     public void InitUpdate(){
         RobotInitializers.clearCache();
         Localizer.Update();
-        Outtake.update();
     }
 
     public void update(){
@@ -72,9 +85,11 @@ public class TeleopsStarter {
 
         if(Lift.getPosition() > 500){
             tSpeed = 0.6;
+            RobotInitializers.ChangeToFloat();
         }
         else {
             tSpeed = 1;
+            RobotInitializers.ChangeToBreak();
         }
         double pow = (min - 1) / (Extendo.MaxExtension) * Extendo.MaxExtension + 1;
         Chassis.drive(

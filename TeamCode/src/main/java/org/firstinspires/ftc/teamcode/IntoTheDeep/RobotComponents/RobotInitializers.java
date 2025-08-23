@@ -12,6 +12,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.Rev9AxisImuOrientationOnRobot;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.ColorRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -26,6 +27,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake.lastreads;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -34,6 +36,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Axis;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ControllersRelated.SimplyfiedControllers;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.Colors;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.TeleopsStarter;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.CachedMotor;
@@ -50,6 +53,8 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.PtoAndWheelie;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Config
@@ -195,13 +200,27 @@ public class RobotInitializers {
         Chassis.BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Chassis.BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
+
+    public static void ChangeToFloat(){
+        Chassis.FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        Chassis.FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        Chassis.BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        Chassis.BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+    }
+
+    public static void ChangeToBreak(){
+        Chassis.FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Chassis.FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Chassis.BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Chassis.BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
     public static void InitializeLocalizer(HardwareMap hm){
         Localizer.Initialize(hm);
     }
 
     public static void InitializeIntake(HardwareMap hm){
         Intake.colorsensor = hm.get(RGBsensor.class, "Storage");
-        Intake.rangesensor = hm.get(RangeSensor.class, "Range");
+        Intake.rangesensor = hm.get(ColorRangeSensor.class, "Range");
         Intake.dropdownServo = new ServoPlus(ControlHubServos, 1, Servo.Direction.FORWARD);
         Intake.spinner = new CachedMotor(ControlHubMotors, 3, DcMotorSimple.Direction.REVERSE);
         Intake.blocker = new ServoPlus(ControlHubServos, 2, Servo.Direction.FORWARD); // TODO: portul bun
@@ -252,6 +271,13 @@ public class RobotInitializers {
     public static void InitializeForOperationAuto(){
         PtoAndWheelie.disengagePTO();
         PtoAndWheelie.IdleWheeliePos();
+        lastreads = new ArrayList<>(
+                Arrays.asList(
+                        Colors.ColorType.NONE,
+                        Colors.ColorType.NONE,
+                        Colors.ColorType.NONE
+                )
+        );
         Lift.state = Lift.LIFTSTATES.RETRACTING;
         Extendo.state = Extendo.ExtendoStates.RETRACTING;
         Outtake.armProfile.setInstant(OVERHEAD_startingpos-1);

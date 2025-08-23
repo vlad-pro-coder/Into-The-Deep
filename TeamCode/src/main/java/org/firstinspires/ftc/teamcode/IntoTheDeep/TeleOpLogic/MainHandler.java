@@ -33,6 +33,7 @@ public class MainHandler {
     Scheduler currentTasks;
     private boolean DidLiftSampleUp = false;
     private boolean TightGripOfClaw = true;
+    private boolean TransferColorSpecific = true;
     modes mode = modes.SAMPLES;
     ActionStates CurrentState = ActionStates.SAMPLETRANSFER;
     Gamepad prev1 = new Gamepad();
@@ -72,7 +73,7 @@ public class MainHandler {
         }
         if(gm1.left_bumper){
             //eject
-            Intake.RotateToEject(0.6);
+            Intake.RotateToEject(0.5);
             Intake.Unblock();
         }
         else if(gm1.right_bumper) {
@@ -127,6 +128,9 @@ public class MainHandler {
                 CurrentState = ActionStates.SPECIMENGRABANDSTAYIDLE;
         }
 
+        if(gm2.square != prev2.square && gm2.square)
+            TransferColorSpecific = !TransferColorSpecific;
+
 
         switch (mode){
             case SAMPLES:
@@ -137,7 +141,7 @@ public class MainHandler {
                             currentTasks.AddAnotherScheduler(TransferSampleSquareActions());
                             CurrentState = ActionStates.SAMPLEBASKET;
                         }
-                        if(currentTasks.IsSchedulerDone() && Intake.HasMixedTeamPiece()) {//change
+                        if(currentTasks.IsSchedulerDone() && ((TransferColorSpecific && Intake.HasMixedTeamPiece()) || (!TransferColorSpecific && Intake.HasOnlyNeutre()))) {//change
                             currentTasks.AddAnotherScheduler(TransferSampleActions());
                             CurrentState = ActionStates.SAMPLEBASKET;
                         }

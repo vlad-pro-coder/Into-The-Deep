@@ -18,6 +18,7 @@ public class Chassis {
         FREEWILL,
         FOLLOWINGPUREPERSUIT,
         FOLLOWINGBEZIERCURVE,
+        OFF,
     }
     public static trajectoryStates usedTrajectory = trajectoryStates.FREEWILL;
     public static SparkFunOTOS.Pose2D target = new SparkFunOTOS.Pose2D(0,0,0);
@@ -109,6 +110,8 @@ public class Chassis {
             case FOLLOWINGBEZIERCURVE:
                 //maybe in the future
                 break;
+            case OFF:
+                drive(0,0,0);
         }
         SparkFunOTOS.Pose2D normal = new SparkFunOTOS.Pose2D(
                 getTargetPosition().x - Localizer.getCurrentPosition().x,

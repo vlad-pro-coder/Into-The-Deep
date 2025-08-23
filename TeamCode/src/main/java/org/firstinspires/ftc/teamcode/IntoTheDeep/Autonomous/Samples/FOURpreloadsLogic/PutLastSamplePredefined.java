@@ -8,6 +8,7 @@ import static org.firstinspires.ftc.teamcode.IntoTheDeep.Autonomous.Samples.Auto
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Scheduler;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Task;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Chassis;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Lift;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake;
@@ -30,7 +31,7 @@ public class PutLastSamplePredefined {
                     @Override
                     protected void Actions() {
                         Outtake.setExtensionPos(EXTENSION_readytakesample);
-                        Lift.CustomPowerToMotors(-0.4);
+                        Lift.CustomPowerToMotors(-0.6);
                     }
 
                     @Override
@@ -41,7 +42,7 @@ public class PutLastSamplePredefined {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        Outtake.closeClaw();
+                        Outtake.closeClawTight();
                     }
 
                     @Override
@@ -57,11 +58,12 @@ public class PutLastSamplePredefined {
                         Outtake.setExtensionPos(extensionoverbasket);
                         Outtake.setOverHeadPos(overbasketangle);
                         Intake.StopSpinner();
+                        Outtake.closeClaw();
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Outtake.ExtensionDoneness() && Outtake.OverHeadDoneness() && Lift.IsLiftDone(150);
+                        return Outtake.ExtensionDoneness() && Outtake.OverHeadDoneness(5) && Lift.IsLiftDone(150);
                     }
                 })
                 .addTask(new Task() {
@@ -78,13 +80,12 @@ public class PutLastSamplePredefined {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        Outtake.setOverHeadPos(OVERHEAD_idle);
-                        Outtake.setExtensionPos(EXTENSION_idle);
+                        Extendo.state = Extendo.ExtendoStates.RETRACTING;
                     }
 
                     @Override
                     protected boolean Conditions() {
-                        return Outtake.OverHeadDoneness(120);
+                        return true;
                     }
                 });
     }

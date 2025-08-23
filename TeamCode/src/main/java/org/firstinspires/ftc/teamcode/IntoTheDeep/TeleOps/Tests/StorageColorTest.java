@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Intake;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers;
 
@@ -20,7 +21,7 @@ public class StorageColorTest extends LinearOpMode {
         while (opModeIsActive()){
             Intake.colorsensor.getColorSeenBySensor();
             RobotInitializers.Dashtelemetry.addData("color", Intake.getStorageStatus());
-            RobotInitializers.Dashtelemetry.addData("disatnce",Intake.rangesensor.getDist());
+            RobotInitializers.Dashtelemetry.addData("disatnce",Intake.rangesensor.getDistance(DistanceUnit.CM));
             RobotInitializers.Dashtelemetry.addData("isagaisttrapdoor",Intake.SampleReachedTrapDoor());
 
             RobotInitializers.Dashtelemetry.addData("r",Intake.colorsensor.RGB.R);

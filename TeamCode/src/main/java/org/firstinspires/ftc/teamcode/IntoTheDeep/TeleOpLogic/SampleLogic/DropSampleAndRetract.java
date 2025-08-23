@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.IntoTheDeep.TeleOpLogic.SampleLogic;
 
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Scheduler;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.ActionsCommandLineImplementation.Task;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Lift;
@@ -7,6 +9,7 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Localizer;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Outtake;
 
 public class DropSampleAndRetract {
+    public static SparkFunOTOS.Pose2D lastpos = new SparkFunOTOS.Pose2D(0,0,0);
 
     public static Scheduler DropSampleAndRetractActions(){
         return new Scheduler()
@@ -14,7 +17,7 @@ public class DropSampleAndRetract {
                     @Override
                     protected void Actions() {
                         Outtake.openClaw();
-                        Localizer.Reset();
+                        lastpos = Localizer.getCurrentPosition();
                     }
 
                     @Override
@@ -31,7 +34,7 @@ public class DropSampleAndRetract {
 
                     @Override
                     protected boolean Conditions() {
-                        return Outtake.OverHeadDoneness() && Localizer.getDistanceFromTwoPoints(null,Localizer.getCurrentPosition()) > 130;
+                        return Outtake.OverHeadDoneness() && Localizer.getDistanceFromTwoPoints(lastpos,Localizer.getCurrentPosition()) > 80;
                     }
                 })
                 .addTask(new Task() {
