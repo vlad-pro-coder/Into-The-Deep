@@ -240,23 +240,29 @@ public class YellowSampleDetectionPipeline extends OpenCvPipeline {
         double besttx = 0,bestty = 0;
         if(tx == null)
             return new SamplePoint(besttx,bestty);
-        for(int i=1;i<tx.size();i++)
-        {
-            RobotLog.ii("tx" + i,"" + Math.toDegrees(tx.get(i)));
-            RobotLog.ii("ty" + i,"" + Math.toDegrees(ty.get(i)));
-            SparkFunOTOS.Pose2D data = GetSamplePosition.getExtendoRotPair(Math.toDegrees(tx.get(i)),Math.toDegrees(ty.get(i)));
-            SparkFunOTOS.Pose2D distances = GetSamplePosition.getPositionRelativeToRobot(Math.toDegrees(tx.get(i)),Math.toDegrees(ty.get(i)));
+        try{
+            for(int i=1;i<tx.size();i++)
+            {
+                if(i >= tx.size()) break;
+                RobotLog.ii("tx" + i,"" + Math.toDegrees(tx.get(i)));
+                RobotLog.ii("ty" + i,"" + Math.toDegrees(ty.get(i)));
+                SparkFunOTOS.Pose2D data = GetSamplePosition.getExtendoRotPair(Math.toDegrees(tx.get(i)),Math.toDegrees(ty.get(i)));
+                SparkFunOTOS.Pose2D distances = GetSamplePosition.getPositionRelativeToRobot(Math.toDegrees(tx.get(i)),Math.toDegrees(ty.get(i)));
 
-            double accepted_distance = startingY + Math.toDegrees(Math.abs(Localizer.getAngleDifference(Math.toRadians(0),data.h))) * diminuator;
+                double accepted_distance = startingY + Math.toDegrees(Math.abs(Localizer.getAngleDifference(Math.toRadians(0),data.h))) * diminuator;
 
-            if(IsIgnored(data) || distances.y < accepted_distance || data.x > Extendo.MaxExtension || Math.abs(Localizer.getAngleDifference(Math.toRadians(26),data.h)) > Math.toRadians(40))
-                continue;
-            if(data.x < mini){
-                mini = data.x;
-                besttx = Math.toDegrees(tx.get(i));
-                bestty = Math.toDegrees(ty.get(i));
+                if(IsIgnored(data) || distances.y < accepted_distance || data.x > Extendo.MaxExtension || Math.abs(Localizer.getAngleDifference(Math.toRadians(26),data.h)) > Math.toRadians(40))
+                    continue;
+                if(data.x < mini){
+                    mini = data.x;
+                    besttx = Math.toDegrees(tx.get(i));
+                    bestty = Math.toDegrees(ty.get(i));
+                }
             }
+        }catch(Exception ignore){
+            return new SamplePoint(besttx,bestty);
         }
+
         return new SamplePoint(besttx,bestty);
     }
 

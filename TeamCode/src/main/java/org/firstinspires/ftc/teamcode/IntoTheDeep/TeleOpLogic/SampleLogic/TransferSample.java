@@ -44,7 +44,7 @@ public class TransferSample {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
-                        Intake.RotateToEject();
+                        Intake.RotateToEject(0.7);
                         Extendo.state = Extendo.ExtendoStates.RETRACTING;
                     }
 

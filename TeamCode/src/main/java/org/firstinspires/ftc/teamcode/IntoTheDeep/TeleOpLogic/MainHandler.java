@@ -148,18 +148,18 @@ public class MainHandler {
                         break;
                     case SAMPLEBASKET:
                         if(true) {
-                            if(gm1.dpad_up != prev1.dpad_up && gm1.dpad_up) {
+                            if((gm1.dpad_up != prev1.dpad_up && gm1.dpad_up) || (gm2.dpad_up != prev2.dpad_up && gm2.dpad_up)) {
                                 currentTasks.AddAnotherScheduler(HighBasketScoreActions());
                                 Lift.currentPos = 0;
                                 DidLiftSampleUp = true;
                             }
-                            if(gm1.dpad_down != prev1.dpad_down && gm1.dpad_down) {
+                            if((gm1.dpad_down != prev1.dpad_down && gm1.dpad_down) || (gm2.dpad_down != prev2.dpad_down && gm2.dpad_down)) {
                                 currentTasks.AddAnotherScheduler(LowBasketScoreActions());
                                 Lift.currentPos = 0;
                                 DidLiftSampleUp = true;
                             }
                             if(currentTasks.IsSchedulerDone() && DidLiftSampleUp){
-                                Outtake.ExtensionMoveWhenOverBasket(Math.abs(gm2.right_stick_y) < 0.05 ? 0:-gm2.right_stick_y);
+                                Outtake.ExtensionMoveWhenOverBasket(gm2.right_trigger - gm2.left_trigger);
                                 int left_bumper = gm2.left_bumper ? 3 : 0;
                                 int right_bumper = gm2.right_bumper ? 3 : 0;
                                 Outtake.OverheadMoveWhenOverBasket(right_bumper - left_bumper);

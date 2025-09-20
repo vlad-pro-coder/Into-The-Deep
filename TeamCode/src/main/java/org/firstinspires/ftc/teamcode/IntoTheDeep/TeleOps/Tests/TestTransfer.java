@@ -125,8 +125,7 @@ public class TestTransfer extends LinearOpMode {
                     @Override
                     protected void Actions() {
                         Lift.state = Lift.LIFTSTATES.FREEWILL;
-                        Lift.setLiftPos(400);
-                        Outtake.setOverHeadPos(OVERHEAD_preload);
+                        Lift.setLiftPos(780);
                         Intake.Unblock();
                     }
 
@@ -139,6 +138,7 @@ public class TestTransfer extends LinearOpMode {
                 .addTask(new Task() {
                     @Override
                     protected void Actions() {
+                        Outtake.setOverHeadPos(OVERHEAD_preload);
                         Outtake.setExtensionPos(1);
                     }
 

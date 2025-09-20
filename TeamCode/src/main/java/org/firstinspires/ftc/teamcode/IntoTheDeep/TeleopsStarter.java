@@ -85,17 +85,15 @@ public class TeleopsStarter {
 
         if(Lift.getPosition() > 500){
             tSpeed = 0.6;
-            RobotInitializers.ChangeToFloat();
         }
         else {
             tSpeed = 1;
-            RobotInitializers.ChangeToBreak();
         }
         double pow = (min - 1) / (Extendo.MaxExtension) * Extendo.MaxExtension + 1;
         Chassis.drive(
                 (reverse ? -1 : 1) * getPowerSigned(gm1.left_stick_x, 3) * tSpeed,
                 (reverse ? 1 : -1) * getPowerSigned(gm1.left_stick_y, 3) * tSpeed,
-                getPowerSigned(gm1.right_trigger - gm1.left_trigger, 3) * tSpeed * pow * rot
+                gm2.cross ? gm1.right_trigger - gm1.left_trigger : getPowerSigned(gm1.right_trigger - gm1.left_trigger, 3) * tSpeed * pow * rot
         );
 
         RobotInitializers.Dashtelemetry.addData("gamepad2 right stick y",-gm2.right_stick_y);

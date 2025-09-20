@@ -21,6 +21,7 @@ public class StorageColorTest extends LinearOpMode {
         while (opModeIsActive()){
             Intake.colorsensor.getColorSeenBySensor();
             RobotInitializers.Dashtelemetry.addData("color", Intake.getStorageStatus());
+            RobotInitializers.Dashtelemetry.addData("trapdoor color",Intake.getTrapDoorStatus());
             RobotInitializers.Dashtelemetry.addData("disatnce",Intake.rangesensor.getDistance(DistanceUnit.CM));
             RobotInitializers.Dashtelemetry.addData("isagaisttrapdoor",Intake.SampleReachedTrapDoor());
 

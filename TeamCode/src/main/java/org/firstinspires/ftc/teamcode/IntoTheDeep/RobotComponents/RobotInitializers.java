@@ -40,6 +40,7 @@ import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.Colors;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Extendo;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.TeleopsStarter;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.CachedMotor;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.ColorRangeSensorWraper;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.RGBsensor;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.IMUBNO085;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.LimitSwitch;
@@ -184,16 +185,16 @@ public class RobotInitializers {
     }
 
     public static void changeDirectionForClimb(){
-        PtoAndWheelie.FL = new CachedMotor(ControlHubMotors, 1, DcMotorSimple.Direction.FORWARD);
+        PtoAndWheelie.FL = new CachedMotor(ControlHubMotors, 1, DcMotorSimple.Direction.REVERSE);
         PtoAndWheelie.FR = new CachedMotor(ExpansionHubMotors, 0, DcMotorSimple.Direction.FORWARD);
-        PtoAndWheelie.BL = new CachedMotor(ControlHubMotors, 0, DcMotorSimple.Direction.REVERSE);
+        PtoAndWheelie.BL = new CachedMotor(ControlHubMotors, 2, DcMotorSimple.Direction.FORWARD);
         PtoAndWheelie.BR = new CachedMotor(ExpansionHubMotors, 2, DcMotorSimple.Direction.REVERSE);
     }
     public static void InitializeChassis(){
-        Chassis.FL = new CachedMotor(ControlHubMotors, 1, DcMotorSimple.Direction.FORWARD);
-        Chassis.FR = new CachedMotor(ExpansionHubMotors, 0, DcMotorSimple.Direction.REVERSE);
-        Chassis.BL = new CachedMotor(ControlHubMotors, 0, DcMotorSimple.Direction.FORWARD);
-        Chassis.BR = new CachedMotor(ExpansionHubMotors, 2, DcMotorSimple.Direction.REVERSE);
+        Chassis.FL = new CachedMotor(ControlHubMotors, 1, DcMotorSimple.Direction.REVERSE);
+        Chassis.FR = new CachedMotor(ExpansionHubMotors, 0, DcMotorSimple.Direction.FORWARD);
+        Chassis.BL = new CachedMotor(ControlHubMotors, 2, DcMotorSimple.Direction.REVERSE);
+        Chassis.BR = new CachedMotor(ExpansionHubMotors, 2, DcMotorSimple.Direction.FORWARD);
 
         Chassis.FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Chassis.FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -201,29 +202,17 @@ public class RobotInitializers {
         Chassis.BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
-    public static void ChangeToFloat(){
-        Chassis.FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        Chassis.FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        Chassis.BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        Chassis.BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-    }
-
-    public static void ChangeToBreak(){
-        Chassis.FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        Chassis.FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        Chassis.BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        Chassis.BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-    }
     public static void InitializeLocalizer(HardwareMap hm){
         Localizer.Initialize(hm);
     }
 
     public static void InitializeIntake(HardwareMap hm){
         Intake.colorsensor = hm.get(RGBsensor.class, "Storage");
-        Intake.rangesensor = hm.get(ColorRangeSensor.class, "Range");
-        Intake.dropdownServo = new ServoPlus(ControlHubServos, 1, Servo.Direction.FORWARD);
+        //Intake.rangesensor = hm.get(ColorRangeSensor.class, "Range");
+        //Intake.rangesensor = new ColorRangeSensorWraper("Range",hm);
+        Intake.dropdownServo = new ServoPlus(ControlHubServos, 4, Servo.Direction.FORWARD);
         Intake.spinner = new CachedMotor(ControlHubMotors, 3, DcMotorSimple.Direction.REVERSE);
-        Intake.blocker = new ServoPlus(ControlHubServos, 2, Servo.Direction.FORWARD); // TODO: portul bun
+        Intake.blocker = new ServoPlus(ControlHubServos, 5, Servo.Direction.FORWARD); // TODO: portul bun
     }
 
     public static void InitializeExtendo(){
@@ -238,7 +227,7 @@ public class RobotInitializers {
     }
     public static void InitializeLift(){
         Lift.motor1 = new CachedMotor(ExpansionHubMotors, 1, DcMotorSimple.Direction.FORWARD);
-        Lift.motor2 = new CachedMotor(ControlHubMotors, 2, DcMotorSimple.Direction.REVERSE);
+        Lift.motor2 = new CachedMotor(ControlHubMotors, 0, DcMotorSimple.Direction.REVERSE);
         Lift.encoder = new CachedMotor(ControlHubMotors, 2, DcMotorSimple.Direction.REVERSE);
         Lift.lm = new LimitSwitch(ControlHubDigital,1);
         Lift.motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

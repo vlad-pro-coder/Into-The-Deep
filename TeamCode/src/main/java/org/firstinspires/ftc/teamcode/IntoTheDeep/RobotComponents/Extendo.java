@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.Lift.LI
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers.Dashtelemetry;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.RobotComponents.RobotInitializers.ExpansionHubDigital;
 import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleopsStarter.gm1;
+import static org.firstinspires.ftc.teamcode.IntoTheDeep.TeleopsStarter.gm2;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
@@ -67,14 +68,27 @@ public class Extendo {
         Dashtelemetry.addData("extendo ticks", getPosition());
         switch (state) {
             case FREEWILL:
-                if (-gm1.right_stick_y >= 0.05 && getPosition() <= MaxExtension - 30) {
-                    time.reset();
-                    motor.setPower(-Math.signum(gm1.right_stick_y) * (gm1.right_stick_y * gm1.right_stick_y));
-                    wasHoldPosOnce = false;
-                } else if (-gm1.right_stick_y <= -0.05 && getPosition() >= 30) {
-                    time.reset();
-                    motor.setPower(-Math.signum(gm1.right_stick_y) * (gm1.right_stick_y * gm1.right_stick_y));
-                    wasHoldPosOnce = false;
+                if(Math.abs(gm1.right_stick_y) >= 0.05) {
+                    if (-gm1.right_stick_y >= 0.05 && getPosition() <= MaxExtension - 30) {
+                        time.reset();
+                        motor.setPower(-Math.signum(gm1.right_stick_y) * (gm1.right_stick_y * gm1.right_stick_y));
+                        wasHoldPosOnce = false;
+                    } else if (-gm1.right_stick_y <= -0.05 && getPosition() >= 30) {
+                        time.reset();
+                        motor.setPower(-Math.signum(gm1.right_stick_y) * (gm1.right_stick_y * gm1.right_stick_y));
+                        wasHoldPosOnce = false;
+                    }
+                }
+                else if(Math.abs(gm2.right_stick_y) >= 0.05){
+                    if (-gm2.right_stick_y >= 0.05 && getPosition() <= MaxExtension - 30) {
+                        time.reset();
+                        motor.setPower(-Math.signum(gm2.right_stick_y) * (gm2.right_stick_y * gm2.right_stick_y));
+                        wasHoldPosOnce = false;
+                    } else if (-gm2.right_stick_y <= -0.05 && getPosition() >= 30) {
+                        time.reset();
+                        motor.setPower(-Math.signum(gm2.right_stick_y) * (gm2.right_stick_y * gm2.right_stick_y));
+                        wasHoldPosOnce = false;
+                    }
                 }
                 else{
                     if (time.seconds() > TimeoutToStabilize)
@@ -89,7 +103,6 @@ public class Extendo {
                         motor.setPower(0);
                     }
                 }
-
                 break;
 
             case RETRACTING:

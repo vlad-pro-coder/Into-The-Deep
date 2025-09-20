@@ -204,7 +204,7 @@ public class Climb {
 
     }
     public static void updateClimb(){
-        pitch = RobotInitializers.imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES);
+        pitch = -RobotInitializers.imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.DEGREES);
         RobotLog.ii("pitch","" + pitch);
         Extendo.CustomPowerToMotors(-0.6);
         tasks.update();

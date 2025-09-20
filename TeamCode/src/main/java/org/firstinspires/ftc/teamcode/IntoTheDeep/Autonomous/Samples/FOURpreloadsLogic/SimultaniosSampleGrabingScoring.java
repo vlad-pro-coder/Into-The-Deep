@@ -123,7 +123,7 @@ public class SimultaniosSampleGrabingScoring {
 
                     @Override
                     protected boolean Conditions() {
-                        return Outtake.OverHeadDoneness(60);
+                        return Outtake.OverHeadDoneness(55);
                     }
                 })
                 .addTask(new Task() {
@@ -167,7 +167,7 @@ public class SimultaniosSampleGrabingScoring {
 
                     @Override
                     protected boolean Conditions() {
-                        return Lift.getPosition() < 300;
+                        return Lift.getPosition() < 400;
                     }
                 })
                 .addTask(new Task() {
@@ -288,7 +288,7 @@ public class SimultaniosSampleGrabingScoring {
 
                     @Override
                     protected boolean Conditions() {
-                        return Outtake.OverHeadDoneness(60);
+                        return Outtake.OverHeadDoneness(55);
                     }
                 })
                 .addTask(new Task() {
@@ -332,7 +332,7 @@ public class SimultaniosSampleGrabingScoring {
 
                     @Override
                     protected boolean Conditions() {
-                        return Lift.getPosition() < 300;
+                        return Lift.getPosition() < 400;
                     }
                 }).addTask(new Task() {
                     @Override

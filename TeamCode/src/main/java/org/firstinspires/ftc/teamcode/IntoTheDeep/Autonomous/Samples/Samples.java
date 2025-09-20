@@ -157,7 +157,11 @@ public class Samples extends LinearOpMode {
                     }
                     if(tasks.IsSchedulerDone())//and no blur
                     {
-                        besttxty = camera.yellow.getBestTxTy();
+                        try {
+                            besttxty = camera.yellow.getBestTxTy();
+                        } catch (Exception e) {
+                            robotstate = RobotStates.FAILEDDETECTION;
+                        }
                         SparkFunOTOS.Pose2D offsets = getPositionRelativeToRobot(besttxty.x, besttxty.y);
                         SparkFunOTOS.Pose2D data = getExtendoRotPair(besttxty.x, besttxty.y);
                         RobotLog.ii("x distance"," " + offsets.x);
@@ -172,10 +176,10 @@ public class Samples extends LinearOpMode {
 
                 case GRABFROMSUBMERSIBLE:
                     if(!WereInstructionGiven){
-                        tasks.AddAnotherScheduler(TakeCachedSampleActions(besttxty,0.7));
+                        tasks.AddAnotherScheduler(TakeCachedSampleActions(besttxty,1));
                         WereInstructionGiven = true;
                     }
-                    if(!Intake.HasMixedTeamPiece() && !Intake.isStorageEmpty())
+                    if(!Intake.HasMixedTeamPiece() && !Intake.isStorageEmpty() && Intake.getTrapDoorStatus() == Intake.getStorageStatus())
                     {
                         tasks.clear();
                         robotstate = RobotStates.FAILEDDETECTION;
@@ -184,8 +188,9 @@ public class Samples extends LinearOpMode {
                     if(tasks.IsSchedulerDone()){
                         RobotLog.ii("color detected", "" + Intake.getStorageStatus());
                         RobotLog.ii("reached trapdoor", "" + Intake.SampleReachedTrapDoor());
+                        RobotLog.ii("reached trapdoor", "" + Intake.SampleReachedTrapDoor());
 
-                        if(Intake.HasMixedTeamPiece() && Intake.SampleReachedTrapDoor()) {//change in color
+                        if(Intake.HasMixedTeamPiece() && Intake.SampleReachedTrapDoor() && Intake.getTrapDoorStatus() == Intake.getStorageStatus()) {//change in color
                             if(30 - time.seconds() > 1)
                                 robotstate = RobotStates.SUBMERSIBLESAMPLECYCLE;
                             RobotLog.ii("accepted","");

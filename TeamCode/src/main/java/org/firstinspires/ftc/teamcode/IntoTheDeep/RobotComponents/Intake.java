@@ -10,6 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.MathHelpers.Colors;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.TEAM;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.CachedMotor;
+import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.ColorRangeSensorWraper;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.RGBsensor;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.RangeSensor;
 import org.firstinspires.ftc.teamcode.IntoTheDeep.Wrapers.ServoPlus;
@@ -38,7 +39,7 @@ public class Intake {
             )
     );
     public static RGBsensor colorsensor;
-    public static ColorRangeSensor rangesensor;
+    public static ColorRangeSensorWraper rangesensor;
     //public static RangeSensor rangesensor;
     public static double dropdownAngle = 185,dropupAngle = 290,startDropDownUpCorrection = 230;
     public static double NotBlockingPos = 22,BlockingPos = 170;
@@ -79,7 +80,7 @@ public class Intake {
     public static SampleType getStorageStatus(){
         if(colorsensor.getDistance(DistanceUnit.CM) >= 6) return SampleType.NONE;
 
-            switch (colorsensor.getColorSeenBySensor()) {
+        switch (colorsensor.getColorSeenBySensor()) {
                 case RED:
                     return SampleType.RED;
                 case BLUE:
@@ -89,6 +90,21 @@ public class Intake {
                 default:
                     return SampleType.NONE;
             }
+
+    }
+    public static SampleType getTrapDoorStatus(){
+        if(rangesensor.getDistance(DistanceUnit.CM) >= 5.6) return SampleType.NONE;
+
+        switch (rangesensor.getColorSeenBySensor()) {
+            case RED:
+                return SampleType.RED;
+            case BLUE:
+                return SampleType.BLUE;
+            case YELLOW:
+                return SampleType.YELLOW;
+            default:
+                return SampleType.NONE;
+        }
 
     }
     public static boolean SampleReachedTrapDoor(){
